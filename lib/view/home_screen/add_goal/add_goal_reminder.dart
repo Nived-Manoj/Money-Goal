@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
+import 'package:money_goal_application/view/bottom_nav_bar/bottom_nav_bar.dart';
 import 'package:money_goal_application/view/home_screen/home_screen.dart';
 
 class SavingsReminderSettings extends StatefulWidget {
@@ -289,7 +290,7 @@ class _SavingsReminderSettingsState extends State<SavingsReminderSettings> {
                     Navigator.push(
                       context,
                       MaterialPageRoute(
-                        builder: (context) => HomeScreen(),
+                        builder: (context) => BottomNav(),
                       ),
                     );
                   },
