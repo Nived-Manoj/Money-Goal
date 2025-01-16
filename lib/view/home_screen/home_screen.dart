@@ -1,16 +1,17 @@
 import 'package:flutter/material.dart';
+import 'package:money_goal_application/view/home_screen/add_goal/add_goal_name.dart';
 import 'dart:ui';
 
 import 'package:money_goal_application/view/home_screen/detail_screen.dart';
 
-class SavingsScreen extends StatefulWidget {
-  const SavingsScreen({Key? key}) : super(key: key);
+class HomeScreen extends StatefulWidget {
+  const HomeScreen({Key? key}) : super(key: key);
 
   @override
-  State<SavingsScreen> createState() => _SavingsScreenState();
+  State<HomeScreen> createState() => _HomeScreenState();
 }
 
-class _SavingsScreenState extends State<SavingsScreen>
+class _HomeScreenState extends State<HomeScreen>
     with SingleTickerProviderStateMixin {
   late AnimationController _progressController;
   late Animation<double> _progressAnimation;
@@ -392,7 +393,13 @@ class _SavingsScreenState extends State<SavingsScreen>
             child: Material(
               color: Colors.transparent,
               child: InkWell(
-                onTap: () {},
+                onTap: () {
+                  Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => AddSavingGoalScreen(),
+                      ));
+                },
                 borderRadius: BorderRadius.circular(30),
                 child: Center(
                   child: Row(

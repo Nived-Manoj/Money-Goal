@@ -13,7 +13,7 @@ class BottomNav extends StatefulWidget {
 class _BottomNavState extends State<BottomNav> {
   int _selectedIndex = 0;
   final List<Widget> _widgetOptions = [
-    SavingsScreen(),
+    HomeScreen(),
     ProgressScreen(),
     SettingsScreen(),
   ];
