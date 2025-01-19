@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:money_goal_application/services/goal_services.dart';
 import 'package:money_goal_application/view/home_screen/add_goal/add_goal_name.dart';
 import 'dart:ui';
 
@@ -393,7 +394,16 @@ class _HomeScreenState extends State<HomeScreen>
             child: Material(
               color: Colors.transparent,
               child: InkWell(
-                onTap: () {
+                onTap: () async{
+                  // await GoalServices.createGoal(
+                  //   amount: "345",
+                  //   currency: "INR",
+                  //   currentBalance: "345678",
+                  //   goalName: "dhrishgoal",
+                  //   image: null,
+                  //   targetDate: "2025-10-20"
+
+                  // );
                   Navigator.push(
                       context,
                       MaterialPageRoute(

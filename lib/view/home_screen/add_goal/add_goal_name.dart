@@ -11,6 +11,7 @@ class AddSavingGoalScreen extends StatefulWidget {
 
 class _AddSavingGoalScreenState extends State<AddSavingGoalScreen> {
   final TextEditingController _goalNameController = TextEditingController();
+  final _goalFormKey = GlobalKey<FormState>();
 
   @override
   Widget build(BuildContext context) {
@@ -82,36 +83,45 @@ class _AddSavingGoalScreenState extends State<AddSavingGoalScreen> {
                         const SizedBox(height: 32),
 
                         // Input Field
-                        Container(
-                          decoration: BoxDecoration(
-                            color: Colors.white,
-                            borderRadius: BorderRadius.circular(16),
-                            boxShadow: [
-                              BoxShadow(
-                                color: Colors.black.withOpacity(0.05),
-                                blurRadius: 10,
-                                offset: const Offset(0, 4),
-                              ),
-                            ],
-                          ),
-                          child: TextField(
-                            controller: _goalNameController,
-                            decoration: InputDecoration(
-                              hintText: 'Saving Goal Name',
-                              hintStyle: TextStyle(color: Colors.grey.shade400),
-                              border: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(16),
-                                borderSide: BorderSide.none,
-                              ),
-                              filled: true,
-                              fillColor: Colors.white,
-                              contentPadding: const EdgeInsets.all(20),
+                        Form(
+                          key: _goalFormKey,
+                          child: Container(
+                            decoration: BoxDecoration(
+                              color: Colors.transparent,
+                              borderRadius: BorderRadius.circular(16),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.black.withOpacity(0.05),
+                                  blurRadius: 10,
+                                  offset: const Offset(0, 4),
+                                ),
+                              ],
                             ),
-                          ),
-                        )
-                            .animate()
-                            .fadeIn(duration: 600.ms)
-                            .slideY(begin: 20, end: 0),
+                            child: TextFormField(
+                              controller: _goalNameController,
+                              validator: (_){
+                                if(_goalNameController.text.trim().isEmpty){
+                                  return "This field is required";
+                                }
+                                return null;
+                              },
+                              decoration: InputDecoration(
+                                hintText: 'Saving Goal Name',
+                                hintStyle: TextStyle(color: Colors.grey.shade400),
+                                border: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(16),
+                                  borderSide: BorderSide.none,
+                                ),
+                                filled: true,
+                                fillColor: Colors.white,
+                                contentPadding: const EdgeInsets.all(20),
+                              ),
+                            ),
+                          )
+                              .animate()
+                              .fadeIn(duration: 600.ms)
+                              .slideY(begin: 20, end: 0),
+                        ),
                       ],
                     ),
                   ),
@@ -123,11 +133,13 @@ class _AddSavingGoalScreenState extends State<AddSavingGoalScreen> {
                 padding: const EdgeInsets.all(24.0),
                 child: ElevatedButton(
                   onPressed: () {
-                    Navigator.push(
+                    if(_goalFormKey.currentState!.validate()){
+                      Navigator.push(
                         context,
                         MaterialPageRoute(
-                          builder: (context) => SavingsIconSelector(),
+                          builder: (context) => SavingsIconSelector(name: _goalNameController.text,),
                         ));
+                    }
                   },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.blue.shade600,

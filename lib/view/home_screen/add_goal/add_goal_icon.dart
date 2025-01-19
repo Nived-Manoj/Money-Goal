@@ -3,7 +3,8 @@ import 'package:flutter_animate/flutter_animate.dart';
 import 'package:money_goal_application/view/home_screen/add_goal/add_goal_amount.dart';
 
 class SavingsIconSelector extends StatefulWidget {
-  const SavingsIconSelector({super.key});
+  final String name;
+  const SavingsIconSelector({super.key, required this.name});
 
   @override
   State<SavingsIconSelector> createState() => _SavingsIconSelectorState();
@@ -148,7 +149,9 @@ class _SavingsIconSelectorState extends State<SavingsIconSelector> {
                             context,
                             MaterialPageRoute(
                               builder: (context) => SavingsGoalDetails(
-                                  selectedIndex: selectedIconIndex!),
+                                  selectedIndex: selectedIconIndex!,
+                                  name: widget.name,
+                                  ),
                             ),
                           );
                         }

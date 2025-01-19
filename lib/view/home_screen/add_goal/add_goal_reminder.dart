@@ -1,10 +1,24 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
+import 'package:intl/intl.dart';
+import 'package:money_goal_application/services/goal_services.dart';
 import 'package:money_goal_application/view/bottom_nav_bar/bottom_nav_bar.dart';
 import 'package:money_goal_application/view/home_screen/home_screen.dart';
 
 class SavingsReminderSettings extends StatefulWidget {
-  const SavingsReminderSettings({super.key});
+  final String name;
+  final String currency;
+  final String amount;
+  final String balance;
+  final DateTime date;
+  const SavingsReminderSettings({
+    super.key,
+    required this.amount,
+    required this.balance,
+    required this.currency,
+    required this.date,
+    required this.name,
+  });
 
   @override
   State<SavingsReminderSettings> createState() =>
@@ -286,13 +300,30 @@ class _SavingsReminderSettingsState extends State<SavingsReminderSettings> {
               Padding(
                 padding: const EdgeInsets.all(24.0),
                 child: ElevatedButton(
-                  onPressed: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => BottomNav(),
-                      ),
-                    );
+                  onPressed: () async {
+                    print(widget.date);
+                    final _date = DateFormat("yyyy-MM-dd").format(widget.date);
+                    final result = await GoalServices.createGoal(
+                        goalName: widget.name,
+                        currency: widget.currency,
+                        amount: widget.amount,
+                        targetDate: _date,
+                        currentBalance: widget.balance);
+
+                    if (result == true) {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => BottomNav(),
+                        ),
+                      );
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Text(
+                              'Goal added successfully'), // Add a Text widget with the desired message
+                        ),
+                      );
+                    }
                   },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.black,

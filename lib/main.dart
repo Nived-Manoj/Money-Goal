@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:money_goal_application/view/bottom_nav_bar/bottom_nav_bar.dart';
 
 void main() {
+  WidgetsFlutterBinding.ensureInitialized();
   runApp(const MyApp());
 }
 

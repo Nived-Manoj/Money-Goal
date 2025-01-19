@@ -6,7 +6,8 @@ import 'package:money_goal_application/view/home_screen/add_goal/add_goal_remind
 
 class SavingsGoalDetails extends StatefulWidget {
   final int selectedIndex;
-  const SavingsGoalDetails({super.key, required this.selectedIndex});
+  final String name;
+  const SavingsGoalDetails({super.key, required this.selectedIndex, required this.name});
 
   @override
   State<SavingsGoalDetails> createState() => _SavingsGoalDetailsState();
@@ -18,6 +19,7 @@ class _SavingsGoalDetailsState extends State<SavingsGoalDetails> {
   final TextEditingController currentBalanceController =
       TextEditingController();
   DateTime selectedDate = DateTime(2025, 2, 14);
+  final _formKey = GlobalKey<FormState>();
 
   final Map<String, Map<String, dynamic>> currencies = {
     'INR': {'flag': '🇮🇳', 'symbol': '₹', 'name': 'Indian Rupee'},
@@ -141,99 +143,114 @@ class _SavingsGoalDetailsState extends State<SavingsGoalDetails> {
               Expanded(
                 child: SingleChildScrollView(
                   padding: const EdgeInsets.symmetric(horizontal: 24.0),
-                  child: Column(
-                    children: [
-                      // Currency Selector
-                      _buildDetailCard(
-                        'Goal Currency',
-                        Row(
-                          children: [
-                            Text(
-                              currencies[selectedCurrency]!['flag'],
-                              style: const TextStyle(fontSize: 24),
-                            ),
-                            const SizedBox(width: 8),
-                            Text(
-                              selectedCurrency,
-                              style: const TextStyle(
-                                fontSize: 18,
-                                fontWeight: FontWeight.w500,
+                  child: Form(
+                    key: _formKey,
+                    child: Column(
+                      children: [
+                        // Currency Selector
+                        _buildDetailCard(
+                          'Goal Currency',
+                          Row(
+                            children: [
+                              Text(
+                                currencies[selectedCurrency]!['flag'],
+                                style: const TextStyle(fontSize: 24),
                               ),
-                            ),
-                            const Spacer(),
-                            const Icon(Icons.chevron_right),
-                          ],
+                              const SizedBox(width: 8),
+                              Text(
+                                selectedCurrency,
+                                style: const TextStyle(
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.w500,
+                                ),
+                              ),
+                              const Spacer(),
+                              const Icon(Icons.chevron_right),
+                            ],
+                          ),
+                          onTap: _showCurrencyPicker,
                         ),
-                        onTap: _showCurrencyPicker,
-                      ),
-
-                      const SizedBox(height: 16),
-
-                      // Goal Amount
-                      _buildDetailCard(
-                        'Goal Amount',
-                        TextField(
-                          controller: goalAmountController,
-                          keyboardType: TextInputType.number,
-                          decoration: InputDecoration(
-                            border: InputBorder.none,
-                            hintText: '0',
-                            suffixText: selectedCurrency,
+                    
+                        const SizedBox(height: 16),
+                    
+                        // Goal Amount
+                        _buildDetailCard(
+                          'Goal Amount',
+                          TextFormField(
+                            controller: goalAmountController,
+                            validator: (_){
+                              if(goalAmountController.text.trim().isEmpty){
+                                return "This field is required";
+                              }
+                              return null;
+                            },
+                            keyboardType: TextInputType.number,
+                            decoration: InputDecoration(
+                              border: InputBorder.none,
+                              hintText: '0',
+                              suffixText: selectedCurrency,
+                            ),
                           ),
                         ),
-                      ),
-
-                      const SizedBox(height: 16),
-
-                      // Current Balance
-                      _buildDetailCard(
-                        'Current Balance',
-                        TextField(
-                          controller: currentBalanceController,
-                          keyboardType: TextInputType.number,
-                          decoration: InputDecoration(
-                            border: InputBorder.none,
-                            hintText: '0',
-                            suffixText: selectedCurrency,
+                    
+                        const SizedBox(height: 16),
+                    
+                        // Current Balance
+                        _buildDetailCard(
+                          'Current Balance',
+                          TextFormField(
+                            controller: currentBalanceController,
+                            validator: (_){
+                              if(currentBalanceController.text.trim().isEmpty){
+                                return "This field is required";
+                              }
+                              return null;
+                            },
+                            keyboardType: TextInputType.number,
+                            decoration: InputDecoration(
+                              border: InputBorder.none,
+                              hintText: '0',
+                              suffixText: selectedCurrency,
+                            ),
                           ),
                         ),
-                      ),
-
-                      const SizedBox(height: 16),
-
-                      // Target Date
-                      _buildDetailCard(
-                        'Target Date',
-                        Row(
-                          children: [
-                            Text(
-                              intl.DateFormat('MMM dd, yyyy')
-                                  .format(selectedDate),
-                              style: const TextStyle(
-                                fontSize: 18,
-                                fontWeight: FontWeight.w500,
+                    
+                        const SizedBox(height: 16),
+                    
+                        // Target Date
+                        _buildDetailCard(
+                          'Target Date',
+                          Row(
+                            children: [
+                              Text(
+                                intl.DateFormat('MMM dd, yyyy')
+                                    .format(selectedDate),
+                                style: const TextStyle(
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.w500,
+                                ),
                               ),
-                            ),
-                            const Spacer(),
-                            const Icon(Icons.calendar_today),
-                          ],
+                              const Spacer(),
+                              const Icon(Icons.calendar_today),
+                            ],
+                          ),
+                          onTap: () async {
+                            final DateTime? picked = await showDatePicker(
+                              context: context,
+                              initialDate: selectedDate,
+                              firstDate: DateTime.now(),
+                              lastDate: DateTime(2030),
+                            );
+                            if (picked != null) {
+                              setState(() => selectedDate = picked);
+                            }
+                          },
                         ),
-                        onTap: () async {
-                          final DateTime? picked = await showDatePicker(
-                            context: context,
-                            initialDate: selectedDate,
-                            firstDate: DateTime.now(),
-                            lastDate: DateTime(2030),
-                          );
-                          if (picked != null) {
-                            setState(() => selectedDate = picked);
-                          }
-                        },
-                      ),
-                    ]
-                        .animate(interval: 100.ms)
-                        .fadeIn()
-                        .slideY(begin: 20, end: 0),
+                      ]
+                          .animate(interval: 100.ms)
+                          .fadeIn()
+                          .slideY(begin: 20, end: 0),
+                    ),
                   ),
                 ),
               ),
@@ -243,12 +260,20 @@ class _SavingsGoalDetailsState extends State<SavingsGoalDetails> {
                 padding: const EdgeInsets.all(24.0),
                 child: ElevatedButton(
                   onPressed: () {
-                    Navigator.push(
+                    if(_formKey.currentState!.validate()){
+                      Navigator.push(
                       context,
                       MaterialPageRoute(
-                        builder: (context) => SavingsReminderSettings(),
+                        builder: (context) => SavingsReminderSettings(
+                          amount: goalAmountController.text,
+                          balance: currentBalanceController.text,
+                          currency: selectedCurrency,
+                          name: widget.name,
+                          date: selectedDate,
+                        ),
                       ),
                     );
+                    }
                   },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.black,
