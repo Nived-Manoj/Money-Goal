@@ -13,6 +13,8 @@ class SavingsIconSelector extends StatefulWidget {
 class _SavingsIconSelectorState extends State<SavingsIconSelector> {
   int? selectedIconIndex;
 
+  IconData? image;
+
   final List<IconData> savingIcons = [
     Icons.add_photo_alternate_outlined,
     Icons.directions_car,
@@ -96,8 +98,10 @@ class _SavingsIconSelectorState extends State<SavingsIconSelector> {
                   itemCount: savingIcons.length,
                   itemBuilder: (context, index) {
                     return GestureDetector(
-                            onTap: () =>
-                                setState(() => selectedIconIndex = index),
+                            onTap: () => setState(() {
+                                  selectedIconIndex = index;
+                                  image = savingIcons[index];
+                                }),
                             child: Container(
                               decoration: BoxDecoration(
                                 shape: BoxShape.circle,
@@ -144,16 +148,21 @@ class _SavingsIconSelectorState extends State<SavingsIconSelector> {
                 child: ElevatedButton(
                   onPressed: selectedIconIndex != null
                       ? () {
-                          // Navigate to the next screen and pass the selected index
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => SavingsGoalDetails(
+                          if (image != null) {
+                            // Navigate to the next screen and pass the selected index
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => SavingsGoalDetails(
                                   selectedIndex: selectedIconIndex!,
                                   name: widget.name,
-                                  ),
-                            ),
-                          );
+                                  icon: image!,
+                                ),
+                              ),
+                            );
+                          }else{
+                            ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text("Select any image")));
+                          }
                         }
                       : null,
                   style: ElevatedButton.styleFrom(

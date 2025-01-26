@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:hive_flutter/hive_flutter.dart';
+import 'package:money_goal_application/db_functions/db_functions.dart';
+import 'package:money_goal_application/model/goal_model.dart';
 import 'package:money_goal_application/services/goal_services.dart';
 import 'package:money_goal_application/view/home_screen/add_goal/add_goal_name.dart';
 import 'dart:ui';
@@ -28,6 +31,10 @@ class _HomeScreenState extends State<HomeScreen>
       CurvedAnimation(parent: _progressController, curve: Curves.easeOutCubic),
     );
     _progressController.forward();
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      getAllGoalBox();
+    });
   }
 
   @override
@@ -182,9 +189,19 @@ class _HomeScreenState extends State<HomeScreen>
                   // Savings Card
                   SliverToBoxAdapter(
                     child: Padding(
-                      padding: const EdgeInsets.all(16.0),
-                      child: _buildSavingsCard(context),
-                    ),
+                        padding: const EdgeInsets.all(16.0),
+                        child: ValueListenableBuilder(
+                            valueListenable: goalListsNotifier,
+                            builder: (context, List<GoalModel> box, _) {
+                              final items = box;
+                              print("lll  $box");
+                              return Column(
+                                children: List.generate(items.length, (index) {
+                                  final item = items[index];
+                                  return _buildSavingsCard(context, goal: item);
+                                }),
+                              );
+                            })),
                   ),
                 ],
               ),
@@ -235,7 +252,23 @@ class _HomeScreenState extends State<HomeScreen>
     );
   }
 
-  Widget _buildSavingsCard(BuildContext context) {
+  Widget _buildSavingsCard(BuildContext context, {required GoalModel goal}) {
+    // Calculate the progress as a fraction
+    double progress = 0.0;
+    final _icon = goal.toIconData(); 
+
+    print(goal.currentBalance);
+    print(goal.amount);
+    try {
+      double currentBalance = double.parse(goal.currentBalance);
+      double targetAmount = double.parse(goal.amount);
+      progress = currentBalance / targetAmount;
+      print(progress);
+      // progress = targetAmount > 0 ? currentBalance / targetAmount : 0.0;
+    } catch (e) {
+      print("Error parsing values: $e");
+    }
+
     return TweenAnimationBuilder(
       duration: const Duration(milliseconds: 800),
       tween: Tween<double>(begin: 50, end: 0),
@@ -263,99 +296,97 @@ class _HomeScreenState extends State<HomeScreen>
               ),
               child: Material(
                 color: Colors.transparent,
-                child: InkWell(
-                  onTap: () {},
-                  borderRadius: BorderRadius.circular(24),
-                  child: Padding(
-                    padding: const EdgeInsets.all(24.0),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Row(
-                          children: [
-                            Container(
-                              padding: const EdgeInsets.all(12),
-                              decoration: BoxDecoration(
-                                gradient: LinearGradient(
-                                  colors: [
-                                    Colors.green.shade400,
-                                    Colors.green.shade600,
-                                  ],
-                                ),
-                                borderRadius: BorderRadius.circular(16),
+                child: Padding(
+                  padding: const EdgeInsets.all(24.0),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        children: [
+                          Container(
+                            padding: const EdgeInsets.all(12),
+                            decoration: BoxDecoration(
+                              gradient: LinearGradient(
+                                colors: [
+                                  Colors.green.shade400,
+                                  Colors.green.shade600,
+                                ],
                               ),
-                              child: const Icon(
-                                Icons.show_chart,
-                                color: Colors.white,
-                                size: 24,
+                              borderRadius: BorderRadius.circular(16),
+                            ),
+                            child:  Icon(
+                                    _icon,
+                                    color: Colors.white,
+                                    size: 24,
+                                  ),
+                          ),
+                          const SizedBox(width: 16),
+                          Text(
+                            goal.name,
+                            style: TextStyle(
+                              fontSize: 20,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 24),
+                      RichText(
+                        text: TextSpan(
+                          children: [
+                            TextSpan(
+                              text: '₹${goal.currentBalance}',
+                              style: TextStyle(
+                                color: Colors.grey[400],
+                                fontSize: 24,
+                                fontWeight: FontWeight.normal,
                               ),
                             ),
-                            const SizedBox(width: 16),
-                            const Text(
-                              'Losses',
+                            TextSpan(
+                              text: ' / ₹${goal.amount}',
                               style: TextStyle(
-                                fontSize: 20,
-                                fontWeight: FontWeight.w600,
+                                color: Colors.green.shade600,
+                                fontSize: 24,
+                                fontWeight: FontWeight.bold,
                               ),
                             ),
                           ],
                         ),
-                        const SizedBox(height: 24),
-                        RichText(
-                          text: TextSpan(
+                      ),
+                      const SizedBox(height: 24),
+                      AnimatedBuilder(
+                        animation: _progressAnimation,
+                        builder: (context, child) {
+                          return Column(
                             children: [
-                              TextSpan(
-                                text: '₹4,190',
-                                style: TextStyle(
-                                  color: Colors.green.shade600,
-                                  fontSize: 24,
-                                  fontWeight: FontWeight.bold,
+                              ClipRRect(
+                                borderRadius: BorderRadius.circular(8),
+                                child: LinearProgressIndicator(
+                                  value: progress, //_progressAnimation.value,
+                                  backgroundColor: Colors.grey[100],
+                                  valueColor: AlwaysStoppedAnimation<Color>(
+                                    Colors.green.shade400,
+                                  ),
+                                  minHeight: 8,
                                 ),
                               ),
-                              TextSpan(
-                                text: ' / ₹50,000',
-                                style: TextStyle(
-                                  color: Colors.grey[400],
-                                  fontSize: 24,
+                              const SizedBox(height: 8),
+                              Align(
+                                alignment: Alignment.centerRight,
+                                child: Text(
+                                  '${(progress * 100).toStringAsFixed(0)}%',
+                                  // '${(_progressAnimation.value * 100).toStringAsFixed(0)}%',
+                                  style: TextStyle(
+                                    color: Colors.green.shade600,
+                                    fontWeight: FontWeight.w600,
+                                  ),
                                 ),
                               ),
                             ],
-                          ),
-                        ),
-                        const SizedBox(height: 24),
-                        AnimatedBuilder(
-                          animation: _progressAnimation,
-                          builder: (context, child) {
-                            return Column(
-                              children: [
-                                ClipRRect(
-                                  borderRadius: BorderRadius.circular(8),
-                                  child: LinearProgressIndicator(
-                                    value: _progressAnimation.value,
-                                    backgroundColor: Colors.grey[100],
-                                    valueColor: AlwaysStoppedAnimation<Color>(
-                                      Colors.green.shade400,
-                                    ),
-                                    minHeight: 8,
-                                  ),
-                                ),
-                                const SizedBox(height: 8),
-                                Align(
-                                  alignment: Alignment.centerRight,
-                                  child: Text(
-                                    '${(_progressAnimation.value * 100).toStringAsFixed(0)}%',
-                                    style: TextStyle(
-                                      color: Colors.green.shade600,
-                                      fontWeight: FontWeight.w600,
-                                    ),
-                                  ),
-                                ),
-                              ],
-                            );
-                          },
-                        ),
-                      ],
-                    ),
+                          );
+                        },
+                      ),
+                    ],
                   ),
                 ),
               ),
@@ -394,16 +425,7 @@ class _HomeScreenState extends State<HomeScreen>
             child: Material(
               color: Colors.transparent,
               child: InkWell(
-                onTap: () async{
-                  // await GoalServices.createGoal(
-                  //   amount: "345",
-                  //   currency: "INR",
-                  //   currentBalance: "345678",
-                  //   goalName: "dhrishgoal",
-                  //   image: null,
-                  //   targetDate: "2025-10-20"
-
-                  // );
+                onTap: () async {
                   Navigator.push(
                       context,
                       MaterialPageRoute(

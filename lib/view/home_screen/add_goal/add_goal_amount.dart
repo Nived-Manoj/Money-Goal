@@ -7,7 +7,11 @@ import 'package:money_goal_application/view/home_screen/add_goal/add_goal_remind
 class SavingsGoalDetails extends StatefulWidget {
   final int selectedIndex;
   final String name;
-  const SavingsGoalDetails({super.key, required this.selectedIndex, required this.name});
+  final IconData icon;
+  const SavingsGoalDetails({super.key, required this.selectedIndex, 
+  required this.name,
+  required this.icon
+  });
 
   @override
   State<SavingsGoalDetails> createState() => _SavingsGoalDetailsState();
@@ -270,6 +274,7 @@ class _SavingsGoalDetailsState extends State<SavingsGoalDetails> {
                           currency: selectedCurrency,
                           name: widget.name,
                           date: selectedDate,
+                          icon: widget.icon,
                         ),
                       ),
                     );

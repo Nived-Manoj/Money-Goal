@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:intl/intl.dart';
+import 'package:money_goal_application/db_functions/db_functions.dart';
+import 'package:money_goal_application/model/goal_model.dart';
 import 'package:money_goal_application/services/goal_services.dart';
 import 'package:money_goal_application/view/bottom_nav_bar/bottom_nav_bar.dart';
 import 'package:money_goal_application/view/home_screen/home_screen.dart';
@@ -11,14 +13,15 @@ class SavingsReminderSettings extends StatefulWidget {
   final String amount;
   final String balance;
   final DateTime date;
-  const SavingsReminderSettings({
-    super.key,
-    required this.amount,
-    required this.balance,
-    required this.currency,
-    required this.date,
-    required this.name,
-  });
+  final IconData icon;
+  const SavingsReminderSettings(
+      {super.key,
+      required this.amount,
+      required this.balance,
+      required this.currency,
+      required this.date,
+      required this.name,
+      required this.icon});
 
   @override
   State<SavingsReminderSettings> createState() =>
@@ -303,27 +306,29 @@ class _SavingsReminderSettingsState extends State<SavingsReminderSettings> {
                   onPressed: () async {
                     print(widget.date);
                     final _date = DateFormat("yyyy-MM-dd").format(widget.date);
-                    final result = await GoalServices.createGoal(
-                        goalName: widget.name,
-                        currency: widget.currency,
-                        amount: widget.amount,
-                        targetDate: _date,
-                        currentBalance: widget.balance);
+                    final result = GoalModel.fromIconData(
+                      name: widget.name,
+                      currency: widget.currency,
+                      amount: widget.amount,
+                      currentBalance: widget.balance,
+                      targetDate: _date,
+                      icon: widget.icon, 
+                    );
 
-                    if (result == true) {
-                      Navigator.push(
+                    addItem(result);
+
+                    Navigator.pushAndRemoveUntil(
                         context,
-                        MaterialPageRoute(
-                          builder: (context) => BottomNav(),
-                        ),
-                      );
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(
+                        MaterialPageRoute(builder: (context) => BottomNav()),
+                        (Route<dynamic> route) => false);
+                            ScaffoldMessenger.of(context).showSnackBar(
+                      const  SnackBar(
                           content: Text(
-                              'Goal added successfully'), // Add a Text widget with the desired message
+                              'Goal added successfully'), 
                         ),
                       );
-                    }
+
+                   
                   },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.black,

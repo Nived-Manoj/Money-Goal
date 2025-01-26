@@ -1,47 +1,45 @@
 import 'dart:convert';
 
+import 'package:flutter/material.dart';
+import 'package:hive/hive.dart';
 import 'package:http/http.dart' as http;
+import 'package:money_goal_application/model/goal_model.dart';
 import 'package:money_goal_application/services/api_lists.dart';
 
 
 class GoalServices {
+  late Box<GoalModel>  goalBox;
 
-  static Future<bool?> createGoal({
-    required String goalName,
-    required String currency,
-    required String amount,
-     String? image,
-    required String targetDate,
-    required String currentBalance
-  }) async{
-    try {
-      final url = Uri.parse(ApiLists.goal);
-      final response = await http.post(url,
-      body: jsonEncode({
-        "name": "aaaa",
-        "currency": currency,
-        "amount": amount,
-        "current_balance": currentBalance,
-        "target_date": targetDate
-      }),
-      headers: {
-        "Content-Type": "application/json",
-      }
-      );
-
-      print(response.statusCode);
-      print(response.body);
-      if(response.statusCode == 201){
-        return true;
-      }else{
-        return false;
-      }
-    } catch (e) {
-      print("error : $e");
-      return null;
-    }
+  Future<void>  openGoalBox()  async{
+    goalBox = await Hive.openBox<GoalModel>("goalBox");
   }
 
+//   void addItem(GoalModel item) {
+//   goalBox.add(item);
+// }
 
-  // static Future<>
+// void addItems(List<GoalModel> items) {
+//   goalBox.addAll(items);
+// }
+
+// List<GoalModel> getItems() {
+//   return goalBox.values.toList();
+// }
+
+// void deleteItem(int index) {
+//   goalBox.deleteAt(index);
+// }
+
+// void updateItem(int index, GoalModel updatedItem) {
+//   goalBox.putAt(index, updatedItem);
+// }
+
+
+
+
+
+
+
+
+
 }
