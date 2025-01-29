@@ -3,6 +3,7 @@ import 'package:flutter_animate/flutter_animate.dart';
 import 'package:intl/intl.dart';
 import 'package:money_goal_application/db_functions/db_functions.dart';
 import 'package:money_goal_application/model/goal_model.dart';
+import 'package:money_goal_application/model/saving_model.dart';
 import 'package:money_goal_application/services/goal_services.dart';
 import 'package:money_goal_application/view/bottom_nav_bar/bottom_nav_bar.dart';
 import 'package:money_goal_application/view/home_screen/home_screen.dart';
@@ -306,29 +307,32 @@ class _SavingsReminderSettingsState extends State<SavingsReminderSettings> {
                   onPressed: () async {
                     print(widget.date);
                     final _date = DateFormat("yyyy-MM-dd").format(widget.date);
+                    List<SavingModel> lists = [];
+                    final model = SavingModel(
+                        description: "asdfghjk",
+                        savingAmount: widget.balance,
+                        transactionDate: DateTime.now().toString());
+                    lists.add(model);
                     final result = GoalModel.fromIconData(
-                      name: widget.name,
-                      currency: widget.currency,
-                      amount: widget.amount,
-                      currentBalance: widget.balance,
-                      targetDate: _date,
-                      icon: widget.icon, 
-                    );
+                        name: widget.name,
+                        currency: widget.currency,
+                        amount: widget.amount,
+                        currentBalance: widget.balance,
+                        targetDate: widget.date,
+                        icon: widget.icon,
+                        savings: lists);
 
-                    addItem(result);
+                    addGoal(result);
 
                     Navigator.pushAndRemoveUntil(
                         context,
                         MaterialPageRoute(builder: (context) => BottomNav()),
                         (Route<dynamic> route) => false);
-                            ScaffoldMessenger.of(context).showSnackBar(
-                      const  SnackBar(
-                          content: Text(
-                              'Goal added successfully'), 
-                        ),
-                      );
-
-                   
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                        content: Text('Goal added successfully'),
+                      ),
+                    );
                   },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.black,

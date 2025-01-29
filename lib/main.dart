@@ -1,18 +1,23 @@
 import 'package:flutter/material.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:money_goal_application/model/goal_model.dart';
+import 'package:money_goal_application/model/saving_model.dart';
 import 'package:money_goal_application/services/goal_services.dart';
 
 import 'package:money_goal_application/view/bottom_nav_bar/bottom_nav_bar.dart';
 
-void main() async{
+void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Hive.initFlutter();
 
-  if(!Hive.isAdapterRegistered(GoalModelAdapter().typeId)){
-Hive.registerAdapter(GoalModelAdapter());
+  if (!Hive.isAdapterRegistered(GoalModelAdapter().typeId)) {
+    Hive.registerAdapter(GoalModelAdapter());
   }
- 
+
+  if (!Hive.isAdapterRegistered(SavingModelAdapter().typeId)) {
+    Hive.registerAdapter(SavingModelAdapter());
+  }
+
   runApp(const MyApp());
 }
 

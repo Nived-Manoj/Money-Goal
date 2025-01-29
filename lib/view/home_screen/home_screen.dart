@@ -33,7 +33,7 @@ class _HomeScreenState extends State<HomeScreen>
     _progressController.forward();
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      getAllGoalBox();
+      getAllGoal();
     });
   }
 
@@ -269,6 +269,8 @@ class _HomeScreenState extends State<HomeScreen>
       print("Error parsing values: $e");
     }
 
+
+
     return TweenAnimationBuilder(
       duration: const Duration(milliseconds: 800),
       tween: Tween<double>(begin: 50, end: 0),
@@ -277,9 +279,13 @@ class _HomeScreenState extends State<HomeScreen>
           offset: Offset(0, value),
           child: InkWell(
             onTap: () {
+              final goalNotifier = ValueNotifier<GoalModel>(goal);
               Navigator.push(
                 context,
-                MaterialPageRoute(builder: (context) => LossesScreen()),
+                MaterialPageRoute(builder: (context) => LossesScreen(
+                  goalNotifier: goalNotifier,
+                  goalData: goal,
+                )),
               );
             },
             child: Container(
