@@ -1,17 +1,22 @@
+import 'dart:math';
+
+import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
-import 'package:hive/hive.dart';
 import 'package:intl/intl.dart';
-import 'package:money_goal_application/db_functions/db_functions.dart';
+import 'package:money_goal_application/core/animated_navigation.dart';
+import 'package:money_goal_application/db_functions/db_helper.dart';
 import 'package:money_goal_application/model/goal_model.dart';
 import 'package:money_goal_application/model/saving_model.dart';
+import 'package:money_goal_application/view/bottom_nav_bar/bottom_nav_bar.dart';
+import 'package:money_goal_application/view/edit_screen/edit_screen.dart';
 
 class LossesScreen extends StatefulWidget {
-  final GoalModel goalData;
-  final ValueNotifier<GoalModel> goalNotifier;
-  const LossesScreen(
-      {Key? key, required this.goalData, required this.goalNotifier})
-      : super(key: key);
+  final GoalModel goal;
+  const LossesScreen({
+    Key? key,
+    required this.goal,
+  }) : super(key: key);
 
   @override
   State<LossesScreen> createState() => _LossesScreenState();
@@ -22,28 +27,54 @@ class _LossesScreenState extends State<LossesScreen> {
   final TextEditingController _amountCont = TextEditingController();
   final TextEditingController _descCont = TextEditingController();
   final _formKey = GlobalKey<FormState>();
+  final DatabaseHelper _dbHelper = DatabaseHelper();
+  late ValueNotifier<List<SavingModel>> savingNotifier;
+
   @override
   void initState() {
     super.initState();
+    savingNotifier = _dbHelper.getSavingsNotifier(widget.goal.id!);
+  }
 
-    getSavingsForGoal(widget.goalData.id.toString());
-    getAllGoalBox(widget.goalData.id.toString());
-    getAllSavings();
+  void showDeleteDialog(BuildContext context, VoidCallback onConfirm) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text("Confirm Deletion"),
+          content: const Text("Are you sure you want to delete this goal?"),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context), // Close the dialog
+              child: const Text("Cancel"),
+            ),
+            TextButton(
+              onPressed: () {
+                onConfirm(); // Call the delete function
+                Navigator.pop(context); // Close the dialog
+              },
+              child: const Text("Delete", style: TextStyle(color: Colors.red)),
+            ),
+          ],
+        );
+      },
+    );
   }
 
   @override
   Widget build(BuildContext context) {
     double progress = 0.0;
     try {
-      double currentBalance = double.parse(widget.goalData.currentBalance);
-      double targetAmount = double.parse(widget.goalData.amount);
-      progress = currentBalance / targetAmount;
-      // Limit progress to 2 decimal places
+      double targetAmount = double.parse(widget.goal.amount);
+      double bal = double.parse(widget.goal.currentBalance);
+      progress = (bal / targetAmount) * 100;
       progress = double.parse(progress.toStringAsFixed(2));
       print(progress);
     } catch (e) {
       print("Error parsing values: $e");
     }
+
+    final _icon = widget.goal.toIconData();
 
     return Scaffold(
       backgroundColor: const Color(0xFF1A1A2E),
@@ -55,7 +86,7 @@ class _LossesScreenState extends State<LossesScreen> {
           onPressed: () => Navigator.pop(context),
         ),
         title: Text(
-          widget.goalData.name,
+          widget.goal.name,
           style: const TextStyle(
             color: Colors.white,
             fontSize: 20,
@@ -63,197 +94,205 @@ class _LossesScreenState extends State<LossesScreen> {
           ),
         ),
         actions: [
-          IconButton(
-            icon: const Icon(Icons.more_vert, color: Colors.white),
-            onPressed: () {},
+          PopupMenuButton<String>(
+            iconColor: Colors.white,
+            position: PopupMenuPosition.under,
+            onSelected: (value) async {
+              if (value == 'edit') {
+                Navigator.push(
+                    context,
+                    AnimatedNavigation().fadeAnimation(EditScreen(
+                      goal: widget.goal,
+                    )));
+              } else if (value == 'delete') {
+                //
+                showDeleteDialog(context, () {
+                  _dbHelper.deleteGoal(widget.goal, context);
+                  Navigator.pop(context);
+                });
+              }
+            },
+            itemBuilder: (BuildContext context) => [
+              const PopupMenuItem(
+                value: 'edit',
+                child: Text('Edit'),
+              ),
+              const PopupMenuItem(
+                value: 'delete',
+                child: Text('Delete'),
+              ),
+            ],
           ),
         ],
       ),
-      body: ValueListenableBuilder(
-          valueListenable: widget.goalNotifier,
-          builder: (context, goalData, child) {
-            return Column(
-              children: [
-                const SizedBox(height: 20),
-                // Amount Display
-                Center(
-                  child: RichText(
-                    text: TextSpan(
-                      children: [
-                        TextSpan(
-                          text: '₹${goalData.currentBalance}',
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontSize: 32,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                        TextSpan(
-                          text: ' / ₹${widget.goalData.amount}',
-                          style: TextStyle(
-                            color: Colors.grey[500],
-                            fontSize: 32,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                      ],
+      body: Column(
+        children: [
+          const SizedBox(height: 20),
+          // Amount Display
+          Center(
+            child: RichText(
+              text: TextSpan(
+                children: [
+                  TextSpan(
+                    text: '₹${widget.goal.currentBalance}',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 32,
+                      fontWeight: FontWeight.bold,
                     ),
                   ),
-                ),
-                const SizedBox(height: 30),
-                // Circular Progress
-                Stack(
-                  alignment: Alignment.center,
-                  children: [
-                    Container(
-                      width: 150,
-                      height: 150,
-                      decoration: BoxDecoration(
-                        shape: BoxShape.circle,
-                        border: Border.all(
-                          color: Colors.white.withOpacity(0.1),
-                          width: 2,
-                        ),
-                      ),
-                      child: Center(
-                        child: Container(
-                          width: 60,
-                          height: 60,
-                          decoration: BoxDecoration(
-                            color: Colors.green,
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                          child: const Icon(
-                            Icons.show_chart,
-                            color: Colors.white,
-                            size: 30,
-                          ),
-                        ),
-                      ),
+                  TextSpan(
+                    text: ' / ₹${widget.goal.amount}',
+                    style: TextStyle(
+                      color: Colors.grey[500],
+                      fontSize: 32,
+                      fontWeight: FontWeight.bold,
                     ),
-                    Positioned(
-                      bottom: 20,
-                      child: Text(
-                        '%${progress}',
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 16,
-                        ),
-                      ),
-                    ),
-                  ],
+                  ),
+                ],
+              ),
+            ),
+          ),
+          const SizedBox(height: 30),
+          // Circular Progress
+          Stack(
+            alignment: Alignment.center,
+            children: [
+              Container(
+                width: 150,
+                height: 150,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  border: Border.all(
+                    color: Colors.white.withOpacity(0.1),
+                    width: 2,
+                  ),
                 ),
-
-                const SizedBox(height: 30),
-                // Action Buttons
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                  children: [
-                    _buildActionButton(
-                        'Add Saving', Icons.add, Colors.white, true,
-                        action: () {
-                      _showAddSavingSheet(context);
-                    }),
-                    _buildActionButton(
-                        'Withdrawal', Icons.remove, Colors.grey[800]!, false),
-                    _buildActionButton(
-                        'Progress', Icons.show_chart, Colors.grey[800]!, false),
-                    _buildActionButton(
-                        'Invite+', Icons.refresh, Colors.grey[800]!, false),
-                  ],
-                ),
-                const SizedBox(height: 40),
-                // Transactions Section
-                Expanded(
+                child: Center(
                   child: Container(
-                    padding: const EdgeInsets.all(20),
+                    width: 60,
+                    height: 60,
                     decoration: BoxDecoration(
-                      color: Colors.grey[900],
-                      borderRadius: const BorderRadius.only(
-                        topLeft: Radius.circular(30),
-                        topRight: Radius.circular(30),
-                      ),
+                      color: Colors.green,
+                      borderRadius: BorderRadius.circular(12),
                     ),
-                    child: SingleChildScrollView(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          const Text(
-                            'Transactions',
-                            style: TextStyle(
-                              color: Colors.white,
-                              fontSize: 20,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-const SizedBox(height: 20),
-                         
-
-                          ValueListenableBuilder<List<SavingModel>>(
-                            valueListenable: savingListsNotifier,
-                            builder: (context, savingList, child) {
-                              final lists = savingList
-                                  .where((item) =>
-                                      item.goalId == widget.goalData.id)
-                                  .toList();
-                              if (lists.isEmpty) {
-                                return Center(child: Text("No savings found"));
-                              }
-
-                              return SingleChildScrollView(
-                                child: Column(
-                                  children:
-                                      List.generate(lists.length, (index) {
-                                    final savings = lists[index];
-                                    print(savings.transactionDate);
-                                    return _buildTransactionItem(
-                                        savings: savings);
-                                  }),
-                                ),
-                              );
-                            },
-                          ),
-
-                          
-                          // ValueListenableBuilder<List<SavingModel>>(
-                          //   valueListenable: savingListsNotifier,
-                          //   builder: (context, savingList, child) {
-                          //     if (savingList.isEmpty) {
-                          //       return Center(child: Text("No savings found"));
-                          //     }
-
-                          //     return Column(
-                          //       children: List.generate(savingList.length, (index) {
-                          //         final savings = savingList[index];
-                          //         return _buildTransactionItem(savings: savings);
-                          //       }),
-                          //     );
-                          //   },
-                          // )
-
-                          // : Text(
-                          //     "Empty transactions",
-                          //     style: TextStyle(
-                          //       color: Colors.white,
-                          //       fontSize: 20,
-                          //       fontWeight: FontWeight.bold,
-                          //     ),
-                          //   ),
-                        ],
-                      ),
+                    child: Icon(
+                      _icon,
+                      color: Colors.white,
+                      size: 30,
                     ),
                   ),
                 ),
-              ],
-            );
-          }),
+              ),
+              Positioned(
+                bottom: 20,
+                child: Text(
+                  '%${progress}',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 16,
+                  ),
+                ),
+              ),
+            ],
+          ),
+
+          const SizedBox(height: 30),
+          // Action Buttons
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            children: [
+              _buildActionButton('Add Saving', Icons.add, Colors.white, true,
+                  action: () {
+                _showAddSavingSheet(context, isWithdraw: false);
+              }),
+              _buildActionButton(
+                  'Withdrawal', Icons.remove, Colors.grey[800]!, false,
+                  action: () {
+                _showAddSavingSheet(context, isWithdraw: true);
+              }),
+              _buildActionButton(action: () {
+                // _showGraphBottomSheet(context);
+                Navigator.pushAndRemoveUntil(
+                    context,
+                    MaterialPageRoute(
+                        builder: (context) => BottomNav(
+                              index: 1,
+                            )),
+                    (Route<dynamic> route) => false);
+              }, 'Progress', Icons.show_chart, Colors.grey[800]!, false),
+              _buildActionButton(
+                  'Invite+', Icons.refresh, Colors.grey[800]!, false),
+            ],
+          ),
+          const SizedBox(height: 40),
+          // Transactions Section
+          Expanded(
+            child: Container(
+              padding: const EdgeInsets.all(20),
+              decoration: BoxDecoration(
+                color: Colors.grey[900],
+                borderRadius: const BorderRadius.only(
+                  topLeft: Radius.circular(30),
+                  topRight: Radius.circular(30),
+                ),
+              ),
+              child: SingleChildScrollView(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text(
+                      'Transactions',
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    const SizedBox(height: 20),
+                    // ValueListenableBuilder<List<SavingModel>>(
+                    //   valueListenable: savingNotifier,
+                    //   builder: (context, savings, child) {
+                    //     return Column(
+                    //       children: List.generate(savings.length, (index) {
+                    //         final saving = savings[index];
+                    //         return ListTile(
+                    //           title: Text("Saved: ${saving.savingAmount}"),
+                    //           subtitle: Text("Date: ${saving.transactionDate}"),
+                    //         );
+                    //       }),
+                    //     );
+                    //   },
+                    // ),
+                    ValueListenableBuilder<List<SavingModel>>(
+                      valueListenable: savingNotifier,
+                      builder: (context, savingList, child) {
+                        return SingleChildScrollView(
+                          child: Column(
+                            children: List.generate(savingList.length, (index) {
+                              final savings = savingList[index];
+                              print(savings.transactionDate);
+                              return _buildTransactionItem(savings: savings);
+                            }),
+                          ),
+                        );
+                      },
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
     );
   }
 
-  void _showAddSavingSheet(BuildContext context) {
+  void _showAddSavingSheet(BuildContext context, {required bool isWithdraw}) {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
+      backgroundColor: Colors.grey[900],
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
       ),
@@ -273,9 +312,12 @@ const SizedBox(height: 20),
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  const Text(
-                    "Add Saving",
-                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                  Text(
+                    isWithdraw == true ? "Withdrawal" : "Add Saving",
+                    style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.white),
                   )
                       .animate()
                       .fadeIn(duration: 500.ms)
@@ -283,6 +325,7 @@ const SizedBox(height: 20),
                   const SizedBox(height: 16),
                   TextFormField(
                     controller: _amountCont,
+                    style: TextStyle(color: Colors.white),
                     decoration: const InputDecoration(
                         labelText: "Amount",
                         hintText: "0",
@@ -310,6 +353,7 @@ const SizedBox(height: 20),
                   const SizedBox(height: 16),
                   TextFormField(
                     controller: _descCont,
+                    style: TextStyle(color: Colors.white),
                     decoration: const InputDecoration(
                         labelText: "Description",
                         hintText: "Additional noted",
@@ -341,9 +385,9 @@ const SizedBox(height: 20),
                         DateFormat('MMM dd, yyyy')
                             .format(selectedDate ?? DateTime.now()),
                         style: const TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.w500,
-                        ),
+                            fontSize: 18,
+                            fontWeight: FontWeight.w500,
+                            color: Colors.white),
                       ),
                       InkWell(
                           onTap: () async {
@@ -357,7 +401,8 @@ const SizedBox(height: 20),
                               setModelSatate(() => selectedDate = picked);
                             }
                           },
-                          child: Icon(Icons.calendar_today)),
+                          child:
+                              Icon(Icons.calendar_today, color: Colors.white)),
                     ],
                   )
                       .animate()
@@ -369,6 +414,11 @@ const SizedBox(height: 20),
                     children: [
                       TextButton(
                         onPressed: () {
+                          setModelSatate(() {
+                            _amountCont.clear();
+                            _descCont.clear();
+                            selectedDate = null;
+                          });
                           Navigator.of(context).pop(); // Close the BottomSheet
                         },
                         child: const Text("Cancel"),
@@ -376,68 +426,91 @@ const SizedBox(height: 20),
                       ElevatedButton(
                         onPressed: () async {
                           if (_formKey.currentState!.validate()) {
-                            if (selectedDate != null) {
-                              try {
-                                print(_amountCont.text);
-                                print(_descCont.text);
+                            if (isWithdraw == true) {
+                              final saving = SavingModel(
+                                savingAmount: _amountCont.text,
+                                transactionDate: selectedDate.toString(),
+                                isWithdraw: true,
+                              );
 
-                                final saving = SavingModel(
-                                  savingAmount: _amountCont.text,
-                                  description: _descCont.text,
-                                  transactionDate: DateFormat('yyyy-MM-dd')
-                                      .format(selectedDate!),
-                                  id: widget.goalData.id,
-                                );
-                                print(
-                                    "gggggggggggg  ${widget.goalData.id.toString()}");
-                                // await addSaving(saving);
-                                // await updateGoalBox(
-                                //     id: widget.goalData.id.toString(),
-                                //     updatedGoal: GoalModel(
-                                //         name: widget.goalData.name,
-                                //         currency: widget.goalData.currency,
-                                //         amount: widget.goalData.amount,
-                                //         currentBalance:
-                                //             widget.goalData.currentBalance,
-                                //         targetDate: widget.goalData.targetDate,
-                                //         iconCodePoint:
-                                //             widget.goalData.iconCodePoint,
-                                //         iconFontFamily:
-                                //             widget.goalData.iconFontFamily,
-                                //         savings: [
-                                //           ...(widget.goalData.savings ?? []),
-                                //           saving
-                                //         ]));
-
-                                await addSavings(
-                                    goalId: widget.goalData.id.toString(),
-                                    saving: saving).then((_) async{
-                                      final amt = int.parse(widget.goalData.amount) + int.parse(_amountCont.text);
-                                       final goalBox = await Hive.openBox<GoalModel>("goalBox");
-                                       goalBox.put(widget.goalData.id, GoalModel(
-                                        name: widget.goalData.name, 
-                                        currency: widget.goalData.currency, 
-                                        amount: amt.toString(), 
-                                        currentBalance: widget.goalData.currentBalance, 
-                                        targetDate: widget.goalData.targetDate, iconCodePoint: widget.goalData.iconCodePoint,
-                                        iconFontFamily: widget.goalData.iconFontFamily, ));
-
-                                    });
+                              double d = double.parse(_amountCont.text);
+                              double cuurentBal =
+                                  double.parse(widget.goal.currentBalance);
+                              if (d > cuurentBal) {
                                 Navigator.pop(context);
-                              } catch (e) {
-                                // Show error to user
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  SnackBar(
-                                    content: Text(
-                                        'Failed to add saving: ${e.toString()}'),
-                                    backgroundColor: Colors.red,
-                                  ),
-                                );
+                                setModelSatate(() {
+                                  _amountCont.clear();
+                                  _descCont.clear();
+                                  selectedDate = null;
+                                });
+
+                                ScaffoldMessenger.of(context)
+                                    .showSnackBar(SnackBar(
+                                  content: Text(
+                                      "You can't withdraw more than your current balance"),
+                                ));
+                              } else {
+                                _dbHelper.addSaving(widget.goal.id!, saving);
+                                double a = double.parse(widget.goal.amount);
+                                double b = double.parse(_amountCont.text);
+
+                                setState(() {
+                                  final c = a - 1 - b;
+                                  widget.goal.currentBalance = c.toString();
+                                });
+
+                                setModelSatate(() {
+                                  _amountCont.clear();
+                                  _descCont.clear();
+                                  selectedDate = null;
+                                });
+
+                                Navigator.pop(context);
+                              }
+                            } else {
+                              final saving = SavingModel(
+                                savingAmount: _amountCont.text,
+                                transactionDate: selectedDate.toString(),
+                                isWithdraw: false,
+                              );
+
+                              double d = double.parse(_amountCont.text);
+                              double cuurentBal =
+                                  double.parse(widget.goal.amount);
+                              if (d > cuurentBal) {
+                                Navigator.pop(context);
+
+                                setModelSatate(() {
+                                  _amountCont.clear();
+                                  _descCont.clear();
+                                  selectedDate = null;
+                                });
+                                ScaffoldMessenger.of(context)
+                                    .showSnackBar(SnackBar(
+                                  content: Text(
+                                      "You can't save more than your current balance"),
+                                ));
+                              } else {
+                                _dbHelper.addSaving(widget.goal.id!, saving);
+                                double a =
+                                    double.parse(widget.goal.currentBalance);
+                                double b = double.parse(_amountCont.text);
+
+                                setState(() {
+                                  final c = a - 1 + b;
+                                  widget.goal.currentBalance = c.toString();
+                                });
+                                setModelSatate(() {
+                                  _amountCont.clear();
+                                  _descCont.clear();
+                                  selectedDate = null;
+                                });
+                                Navigator.pop(context);
                               }
                             }
                           }
                         },
-                        child: Text("Update Goal"),
+                        child: Text(isWithdraw == true ? "Withdraw" : "Add"),
                       ),
                     ],
                   ),
@@ -485,9 +558,18 @@ const SizedBox(height: 20),
   }
 
   Widget _buildTransactionItem({required SavingModel savings}) {
-    final _format =
-        DateTime.parse(savings.transactionDate ?? DateTime.now().toString());
-    final date = DateFormat("MMM dd, yyyy").format(_format);
+    final String dateString =
+        savings.transactionDate ?? DateTime.now().toString();
+
+// Remove microseconds from the date string
+    final String cleanedDateString = dateString.split('.').first;
+
+// Parse and format the date
+    final DateTime parsedDate = DateTime.parse(cleanedDateString);
+    final String formattedDate = DateFormat("MMM dd, yyyy").format(parsedDate);
+
+    print(formattedDate); // Output: "Feb 16, 2025"
+
     return Padding(
       padding: const EdgeInsets.only(bottom: 20),
       child: Row(
@@ -496,31 +578,42 @@ const SizedBox(height: 20),
             width: 40,
             height: 40,
             decoration: BoxDecoration(
-              color: Colors.green.withOpacity(0.2),
+              color: savings.isWithdraw == true
+                  ? Colors.red.withValues(alpha: 0.2)
+                  : Colors.green.withValues(alpha: 0.2),
               shape: BoxShape.circle,
             ),
-            child: const Icon(
-              Icons.add,
-              color: Colors.green,
+            child: Icon(
+              savings.isWithdraw == true ? Icons.remove : Icons.add,
+              color: savings.isWithdraw == true ? Colors.red : Colors.green,
             ),
           ),
           const SizedBox(width: 15),
           Text(
-            date,
+            formattedDate.toString(),
             style: const TextStyle(
               color: Colors.white,
               fontSize: 16,
             ),
           ),
           const Spacer(),
-          Text(
-            '+ ₹${savings.savingAmount}',
-            style: const TextStyle(
-              color: Colors.green,
-              fontSize: 16,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
+          savings.isWithdraw == true
+              ? Text(
+                  '- ₹${savings.savingAmount}',
+                  style: const TextStyle(
+                    color: Colors.red,
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                  ),
+                )
+              : Text(
+                  '+ ₹${savings.savingAmount}',
+                  style: const TextStyle(
+                    color: Colors.green,
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
         ],
       ),
     );

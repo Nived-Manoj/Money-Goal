@@ -22,13 +22,14 @@ class SavingModelAdapter extends TypeAdapter<SavingModel> {
       savingAmount: fields[1] as String?,
       transactionDate: fields[2] as String?,
       goalId: fields[4] as String?,
+      isWithdraw: fields[5] as bool?,
     );
   }
 
   @override
   void write(BinaryWriter writer, SavingModel obj) {
     writer
-      ..writeByte(5)
+      ..writeByte(6)
       ..writeByte(0)
       ..write(obj.id)
       ..writeByte(1)
@@ -38,7 +39,9 @@ class SavingModelAdapter extends TypeAdapter<SavingModel> {
       ..writeByte(3)
       ..write(obj.description)
       ..writeByte(4)
-      ..write(obj.goalId);
+      ..write(obj.goalId)
+      ..writeByte(5)
+      ..write(obj.isWithdraw);
   }
 
   @override

@@ -22,7 +22,7 @@ class _SavingsGoalDetailsState extends State<SavingsGoalDetails> {
   final TextEditingController goalAmountController = TextEditingController();
   final TextEditingController currentBalanceController =
       TextEditingController();
-  DateTime selectedDate = DateTime(2025, 2, 14);
+  DateTime selectedDate = DateTime.now();
   final _formKey = GlobalKey<FormState>();
 
   final Map<String, Map<String, dynamic>> currencies = {
@@ -345,4 +345,6 @@ class _SavingsGoalDetailsState extends State<SavingsGoalDetails> {
       ),
     );
   }
+
+
 }

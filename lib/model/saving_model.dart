@@ -19,13 +19,20 @@ class SavingModel extends HiveObject{
   @HiveField(4)
    String? goalId;
 
+   @HiveField(5)
+   bool? isWithdraw;
+
+
+
 
   SavingModel({
     this.description,
     this.id,
     this.savingAmount,
     this.transactionDate,
-     this.goalId
+     this.goalId,
+     this.isWithdraw,
     
   });
+ 
 }

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:intl/intl.dart';
-import 'package:money_goal_application/db_functions/db_functions.dart';
+import 'package:money_goal_application/db_functions/db_helper.dart';
 import 'package:money_goal_application/model/goal_model.dart';
 import 'package:money_goal_application/model/saving_model.dart';
 import 'package:money_goal_application/services/goal_services.dart';
@@ -322,7 +322,7 @@ class _SavingsReminderSettingsState extends State<SavingsReminderSettings> {
                         icon: widget.icon,
                         savings: lists);
 
-                    addGoal(result);
+                    DatabaseHelper().addGoal(result);
 
                     Navigator.pushAndRemoveUntil(
                         context,

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:hive_flutter/hive_flutter.dart';
-import 'package:money_goal_application/db_functions/db_functions.dart';
+import 'package:money_goal_application/db_functions/db_helper.dart';
 import 'package:money_goal_application/model/goal_model.dart';
 import 'package:money_goal_application/services/goal_services.dart';
 import 'package:money_goal_application/view/home_screen/add_goal/add_goal_name.dart';
@@ -19,6 +19,8 @@ class _HomeScreenState extends State<HomeScreen>
     with SingleTickerProviderStateMixin {
   late AnimationController _progressController;
   late Animation<double> _progressAnimation;
+  final DatabaseHelper _dbHelper = DatabaseHelper();
+  String selectedSortOption = 'Progress'; // Default sorting option
 
   @override
   void initState() {
@@ -31,16 +33,45 @@ class _HomeScreenState extends State<HomeScreen>
       CurvedAnimation(parent: _progressController, curve: Curves.easeOutCubic),
     );
     _progressController.forward();
-
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      getAllGoal();
-    });
   }
 
   @override
   void dispose() {
     _progressController.dispose();
     super.dispose();
+  }
+
+  List<GoalModel> _sortGoals(List<GoalModel> goals) {
+    switch (selectedSortOption) {
+      case 'Date':
+        return _sortByDate(goals);
+      case 'Alphabet':
+        return _sortByAlphabet(goals);
+      case 'Progress':
+        return _sortByProgress(goals);
+      default:
+        return goals;
+    }
+  }
+
+  List<GoalModel> _sortByDate(List<GoalModel> goals) {
+    return goals
+      ..sort((a, b) => b.targetDate.compareTo(a.targetDate)); // Newest first
+  }
+
+  List<GoalModel> _sortByAlphabet(List<GoalModel> goals) {
+    return goals..sort((a, b) => a.name.compareTo(b.name)); // A-Z
+  }
+
+  List<GoalModel> _sortByProgress(List<GoalModel> goals) {
+    return goals
+      ..sort((a, b) {
+        double progressA =
+            double.parse(a.currentBalance) / double.parse(a.amount);
+        double progressB =
+            double.parse(b.currentBalance) / double.parse(b.amount);
+        return progressB.compareTo(progressA); // Highest progress first
+      });
   }
 
   @override
@@ -102,7 +133,7 @@ class _HomeScreenState extends State<HomeScreen>
                               );
                             },
                           ),
-                          // Premium Button
+
                           TweenAnimationBuilder(
                             duration: const Duration(milliseconds: 800),
                             tween: Tween<double>(begin: 0, end: 1),
@@ -132,14 +163,14 @@ class _HomeScreenState extends State<HomeScreen>
                                   ),
                                   child: Row(
                                     children: const [
-                                      Icon(
-                                        Icons.star,
-                                        color: Colors.amber,
-                                        size: 16,
-                                      ),
-                                      SizedBox(width: 8),
+                                      // Icon(
+                                      //   Icons.star,
+                                      //   color: Colors.amber,
+                                      //   size: 16,
+                                      // ),
+                                      // SizedBox(width: 8),
                                       Text(
-                                        'Mani Premium',
+                                        'Money Goal',
                                         style: TextStyle(
                                           color: Colors.white,
                                           fontWeight: FontWeight.w600,
@@ -151,6 +182,60 @@ class _HomeScreenState extends State<HomeScreen>
                               );
                             },
                           ),
+                       
+                       
+                          // Premium Button
+                          // TweenAnimationBuilder(
+                          //   duration: const Duration(milliseconds: 800),
+                          //   tween: Tween<double>(begin: 0, end: 1),
+                          //   builder: (context, double value, child) {
+                          //     return Transform.scale(
+                          //       scale: value,
+                          //       child: Container(
+                          //         padding: const EdgeInsets.symmetric(
+                          //           horizontal: 16,
+                          //           vertical: 12,
+                          //         ),
+                          //         decoration: BoxDecoration(
+                          //           gradient: LinearGradient(
+                          //             colors: [
+                          //               Colors.black,
+                          //               Colors.black.withOpacity(0.8),
+                          //             ],
+                          //           ),
+                          //           borderRadius: BorderRadius.circular(20),
+                          //           boxShadow: [
+                          //             BoxShadow(
+                          //               color: Colors.black.withOpacity(0.2),
+                          //               blurRadius: 10,
+                          //               offset: const Offset(0, 4),
+                          //             ),
+                          //           ],
+                          //         ),
+                          //         child: Row(
+                          //           children: const [
+                          //             Icon(
+                          //               Icons.star,
+                          //               color: Colors.amber,
+                          //               size: 16,
+                          //             ),
+                          //             SizedBox(width: 8),
+                          //             Text(
+                          //               'Mani Premium',
+                          //               style: TextStyle(
+                          //                 color: Colors.white,
+                          //                 fontWeight: FontWeight.w600,
+                          //               ),
+                          //             ),
+                          //           ],
+                          //         ),
+                          //       ),
+                          //     );
+                          //   },
+                          // ),
+                       
+                       
+                       
                         ],
                       ),
                     ),
@@ -191,20 +276,27 @@ class _HomeScreenState extends State<HomeScreen>
                     child: Padding(
                         padding: const EdgeInsets.all(16.0),
                         child: ValueListenableBuilder(
-                            valueListenable: goalListsNotifier,
-                            builder: (context, List<GoalModel> box, _) {
-                              final items = box;
-                              print("lll  $box");
+                            valueListenable: _dbHelper.goalsBox.listenable(),
+                            builder: (context, Box<GoalModel> box, _) {
+                              final items = box.values.toList();
+                              final sortedItems = _sortGoals(items);
+
                               return Column(
                                 children: List.generate(items.length, (index) {
                                   final item = items[index];
-                                  return _buildSavingsCard(context, goal: item);
+                                  final goalKey = box.keyAt(index);
+                                  return _buildSavingsCard(context,
+                                      goal: item, index: goalKey);
                                 }),
                               );
                             })),
                   ),
+
+                  
                 ],
               ),
+
+             
 
               // Add Goal Button
               Positioned(
@@ -227,7 +319,100 @@ class _HomeScreenState extends State<HomeScreen>
     return Material(
       color: Colors.transparent,
       child: InkWell(
-        onTap: () {},
+        onTap: () {
+          showModalBottomSheet(
+              context: context,
+              builder: (BuildContext context) {
+                return Container(
+                  height: 350,
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 15),
+                    child: Column(
+                      children: [
+                        Row(
+                         children: [
+                            Text(
+                              'Sort by',
+                              style: TextStyle(
+                                fontSize: 20,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                            Spacer(),
+                            IconButton(
+                              onPressed: () {
+                                 setState(() {
+                              selectedSortOption = 'Date';
+                            });
+                            Navigator.pop(context);
+                              },
+                              icon: Icon(Icons.close),
+                            ),
+                         ],
+                        ),
+                        ListTile(
+                          title: const Text('Progress',
+                           style: TextStyle(
+                                fontSize: 18,
+                                fontWeight: FontWeight.normal,
+                              ),),
+                          trailing: selectedSortOption == 'Progress'
+                              ? Icon(
+                                  Icons.check,
+                                  color: Colors.green,
+                                )
+                              : const SizedBox.shrink(),
+                          onTap: () {
+                            setState(() {
+                              selectedSortOption = 'Progress';
+                            });
+                            Navigator.pop(context);
+                          },
+                        ),
+                        ListTile(
+                          title: Text('Date',
+                           style: TextStyle(
+                                fontSize: 18,
+                                fontWeight: FontWeight.normal,
+                              ),),
+                          trailing: selectedSortOption == 'Date'
+                              ? Icon(
+                                  Icons.check,
+                                  color: Colors.green,
+                                )
+                              : const SizedBox.shrink(),
+                          onTap: () {
+                            setState(() {
+                              selectedSortOption = 'Date';
+                            });
+                            Navigator.pop(context);
+                          },
+                        ),
+                        ListTile(
+                          title: Text('Alphabet',
+                           style: TextStyle(
+                                fontSize: 18,
+                                fontWeight: FontWeight.normal,
+                              ),),
+                          trailing: selectedSortOption == 'Alphabet'
+                              ? Icon(
+                                  Icons.check,
+                                  color: Colors.green,
+                                )
+                              : const SizedBox.shrink(),
+                          onTap: () {
+                            setState(() {
+                              selectedSortOption = 'Alphabet';
+                            });
+                            Navigator.pop(context);
+                          },
+                        ),
+                      ],
+                    ),
+                  ),
+                );
+              });
+        },
         borderRadius: BorderRadius.circular(12),
         child: Container(
           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
@@ -252,13 +437,12 @@ class _HomeScreenState extends State<HomeScreen>
     );
   }
 
-  Widget _buildSavingsCard(BuildContext context, {required GoalModel goal}) {
+  Widget _buildSavingsCard(BuildContext context,
+      {required GoalModel goal, required int index}) {
     // Calculate the progress as a fraction
     double progress = 0.0;
-    final _icon = goal.toIconData(); 
+    final _icon = goal.toIconData();
 
-    print(goal.currentBalance);
-    print(goal.amount);
     try {
       double currentBalance = double.parse(goal.currentBalance);
       double targetAmount = double.parse(goal.amount);
@@ -269,8 +453,6 @@ class _HomeScreenState extends State<HomeScreen>
       print("Error parsing values: $e");
     }
 
-
-
     return TweenAnimationBuilder(
       duration: const Duration(milliseconds: 800),
       tween: Tween<double>(begin: 50, end: 0),
@@ -279,13 +461,12 @@ class _HomeScreenState extends State<HomeScreen>
           offset: Offset(0, value),
           child: InkWell(
             onTap: () {
-              final goalNotifier = ValueNotifier<GoalModel>(goal);
               Navigator.push(
                 context,
-                MaterialPageRoute(builder: (context) => LossesScreen(
-                  goalNotifier: goalNotifier,
-                  goalData: goal,
-                )),
+                MaterialPageRoute(
+                    builder: (context) => LossesScreen(
+                          goal: goal,
+                        )),
               );
             },
             child: Container(
@@ -320,11 +501,11 @@ class _HomeScreenState extends State<HomeScreen>
                               ),
                               borderRadius: BorderRadius.circular(16),
                             ),
-                            child:  Icon(
-                                    _icon,
-                                    color: Colors.white,
-                                    size: 24,
-                                  ),
+                            child: Icon(
+                              _icon,
+                              color: Colors.white,
+                              size: 24,
+                            ),
                           ),
                           const SizedBox(width: 16),
                           Text(

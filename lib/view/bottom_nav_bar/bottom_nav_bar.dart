@@ -4,7 +4,8 @@ import 'package:money_goal_application/view/profile_screen/settings_screen.dart'
 import 'package:money_goal_application/view/progress_screen/progress_screen.dart';
 
 class BottomNav extends StatefulWidget {
-  const BottomNav({Key? key}) : super(key: key);
+  final int? index;
+  const BottomNav({Key? key, this.index}) : super(key: key);
 
   @override
   _BottomNavState createState() => _BottomNavState();
@@ -21,6 +22,19 @@ class _BottomNavState extends State<BottomNav> {
   void _onItemTapped(int index) {
     setState(() {
       _selectedIndex = index;
+    });
+  }
+
+  @override
+  void initState() {
+    super.initState();
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (widget.index != null) {
+        setState(() {
+          _selectedIndex = widget.index!;
+        });
+      }
     });
   }
 

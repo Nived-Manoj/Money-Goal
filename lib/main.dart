@@ -17,7 +17,7 @@ void main() async {
   if (!Hive.isAdapterRegistered(SavingModelAdapter().typeId)) {
     Hive.registerAdapter(SavingModelAdapter());
   }
-
+ await Hive.openBox<GoalModel>('goals');
   runApp(const MyApp());
 }
 
