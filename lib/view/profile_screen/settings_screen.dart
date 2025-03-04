@@ -65,7 +65,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                       [
                         SettingItem(
                           icon: Icons.archive_outlined,
-                          title: 'Archived Goals',
+                          title: 'Achieved Goals',
                           onTap: () {},
                         ),
                       ],
