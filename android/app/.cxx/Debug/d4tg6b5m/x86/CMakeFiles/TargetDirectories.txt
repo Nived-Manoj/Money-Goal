@@ -1,0 +1,2 @@
+C:/Users/hp/Desktop/dhrisya_vs_code/flutter_projects/Money-Goal/android/app/.cxx/Debug/d4tg6b5m/x86/CMakeFiles/edit_cache.dir
+C:/Users/hp/Desktop/dhrisya_vs_code/flutter_projects/Money-Goal/android/app/.cxx/Debug/d4tg6b5m/x86/CMakeFiles/rebuild_cache.dir

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:hive/hive.dart';
 import 'package:money_goal_application/model/goal_model.dart';
 import 'package:money_goal_application/model/saving_model.dart';
@@ -40,9 +41,15 @@ Future<void> updateGoal(GoalModel goal) async {
   // Delete a goal
   Future<void> deleteGoal(GoalModel goal, BuildContext context) async {
     await goal.delete().then((_) {
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-        content: Text("Goal deleted successfully"),
-      ));
+      Fluttertoast.showToast(
+    msg: "Goal deleted successfully",
+    toastLength: Toast.LENGTH_SHORT, // or Toast.LENGTH_LONG
+    gravity: ToastGravity.BOTTOM, // Position of the toast
+    backgroundColor: Colors.black54,
+    textColor: Colors.white,
+    fontSize: 16.0,
+  );
+      
     });
   }
 

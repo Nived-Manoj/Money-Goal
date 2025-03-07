@@ -3,6 +3,7 @@ import 'dart:math';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:intl/intl.dart';
 import 'package:money_goal_application/core/animated_navigation.dart';
 import 'package:money_goal_application/db_functions/db_helper.dart';
@@ -23,7 +24,7 @@ class LossesScreen extends StatefulWidget {
 }
 
 class _LossesScreenState extends State<LossesScreen> {
-  DateTime? selectedDate;
+  DateTime selectedDate = DateTime.now();
   final TextEditingController _amountCont = TextEditingController();
   final TextEditingController _descCont = TextEditingController();
   final _formKey = GlobalKey<FormState>();
@@ -221,8 +222,8 @@ class _LossesScreenState extends State<LossesScreen> {
                             )),
                     (Route<dynamic> route) => false);
               }, 'Progress', Icons.show_chart, Colors.grey[800]!, false),
-              _buildActionButton(
-                  'Invite+', Icons.refresh, Colors.grey[800]!, false),
+              // _buildActionButton(
+              //     'Invite+', Icons.refresh, Colors.grey[800]!, false),
             ],
           ),
           const SizedBox(height: 40),
@@ -289,23 +290,22 @@ class _LossesScreenState extends State<LossesScreen> {
   }
 
   void _showAddSavingSheet(BuildContext context, {required bool isWithdraw}) {
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      backgroundColor: Colors.grey[900],
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
-      ),
-      builder: (BuildContext context) {
-        return StatefulBuilder(
-            builder: (BuildContext context, StateSetter setModelSatate) {
+  showModalBottomSheet(
+    context: context,
+    isScrollControlled: true,
+    backgroundColor: Colors.grey[900],
+    shape: const RoundedRectangleBorder(
+      borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+    ),
+    builder: (BuildContext context) {
+      return StatefulBuilder(
+        builder: (BuildContext context, StateSetter setModelState) {
           return Padding(
             padding: EdgeInsets.only(
               left: 16,
               right: 16,
               top: 16,
-              bottom: MediaQuery.of(context).viewInsets.bottom +
-                  16, // Handles keyboard padding
+              bottom: MediaQuery.of(context).viewInsets.bottom + 16, // Handles keyboard padding
             ),
             child: Form(
               key: _formKey,
@@ -315,9 +315,10 @@ class _LossesScreenState extends State<LossesScreen> {
                   Text(
                     isWithdraw == true ? "Withdrawal" : "Add Saving",
                     style: TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.white),
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white,
+                    ),
                   )
                       .animate()
                       .fadeIn(duration: 500.ms)
@@ -327,24 +328,28 @@ class _LossesScreenState extends State<LossesScreen> {
                     controller: _amountCont,
                     style: TextStyle(color: Colors.white),
                     decoration: const InputDecoration(
-                        labelText: "Amount",
-                        hintText: "0",
-                        labelStyle: TextStyle(color: Colors.grey),
-                        border: OutlineInputBorder(
-                            borderRadius: BorderRadius.all(
-                              Radius.circular(15),
-                            ),
-                            borderSide: BorderSide(color: Colors.grey)),
-                        enabledBorder: OutlineInputBorder(
-                            borderRadius: BorderRadius.all(
-                              Radius.circular(15),
-                            ),
-                            borderSide: BorderSide(color: Colors.grey)),
-                        focusedBorder: OutlineInputBorder(
-                            borderRadius: BorderRadius.all(
-                              Radius.circular(15),
-                            ),
-                            borderSide: BorderSide(color: Colors.grey))),
+                      labelText: "Amount",
+                      hintText: "0",
+                      labelStyle: TextStyle(color: Colors.grey),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.all(
+                          Radius.circular(15),
+                        ),
+                        borderSide: BorderSide(color: Colors.grey),
+                      ),
+                      enabledBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.all(
+                          Radius.circular(15),
+                        ),
+                        borderSide: BorderSide(color: Colors.grey),
+                      ),
+                      focusedBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.all(
+                          Radius.circular(15),
+                        ),
+                        borderSide: BorderSide(color: Colors.grey),
+                      ),
+                    ),
                     keyboardType: TextInputType.number,
                   )
                       .animate()
@@ -355,24 +360,28 @@ class _LossesScreenState extends State<LossesScreen> {
                     controller: _descCont,
                     style: TextStyle(color: Colors.white),
                     decoration: const InputDecoration(
-                        labelText: "Description",
-                        hintText: "Additional noted",
-                        labelStyle: TextStyle(color: Colors.grey),
-                        border: OutlineInputBorder(
-                            borderRadius: BorderRadius.all(
-                              Radius.circular(15),
-                            ),
-                            borderSide: BorderSide(color: Colors.grey)),
-                        enabledBorder: OutlineInputBorder(
-                            borderRadius: BorderRadius.all(
-                              Radius.circular(15),
-                            ),
-                            borderSide: BorderSide(color: Colors.grey)),
-                        focusedBorder: OutlineInputBorder(
-                            borderRadius: BorderRadius.all(
-                              Radius.circular(15),
-                            ),
-                            borderSide: BorderSide(color: Colors.grey))),
+                      labelText: "Description",
+                      hintText: "Additional noted",
+                      labelStyle: TextStyle(color: Colors.grey),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.all(
+                          Radius.circular(15),
+                        ),
+                        borderSide: BorderSide(color: Colors.grey),
+                      ),
+                      enabledBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.all(
+                          Radius.circular(15),
+                        ),
+                        borderSide: BorderSide(color: Colors.grey),
+                      ),
+                      focusedBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.all(
+                          Radius.circular(15),
+                        ),
+                        borderSide: BorderSide(color: Colors.grey),
+                      ),
+                    ),
                   )
                       .animate()
                       .fadeIn(duration: 700.ms)
@@ -385,24 +394,25 @@ class _LossesScreenState extends State<LossesScreen> {
                         DateFormat('MMM dd, yyyy')
                             .format(selectedDate ?? DateTime.now()),
                         style: const TextStyle(
-                            fontSize: 18,
-                            fontWeight: FontWeight.w500,
-                            color: Colors.white),
+                          fontSize: 18,
+                          fontWeight: FontWeight.w500,
+                          color: Colors.white,
+                        ),
                       ),
                       InkWell(
-                          onTap: () async {
-                            final DateTime? picked = await showDatePicker(
-                              context: context,
-                              initialDate: selectedDate,
-                              firstDate: DateTime.now(),
-                              lastDate: DateTime(2030),
-                            );
-                            if (picked != null) {
-                              setModelSatate(() => selectedDate = picked);
-                            }
-                          },
-                          child:
-                              Icon(Icons.calendar_today, color: Colors.white)),
+                        onTap: () async {
+                          final DateTime? picked = await showDatePicker(
+                            context: context,
+                            initialDate: selectedDate,
+                            firstDate: DateTime.now(),
+                            lastDate: DateTime(2030),
+                          );
+                          if (picked != null) {
+                            setModelState(() => selectedDate = picked);
+                          }
+                        },
+                        child: Icon(Icons.calendar_today, color: Colors.white),
+                      ),
                     ],
                   )
                       .animate()
@@ -414,10 +424,10 @@ class _LossesScreenState extends State<LossesScreen> {
                     children: [
                       TextButton(
                         onPressed: () {
-                          setModelSatate(() {
+                          setModelState(() {
                             _amountCont.clear();
                             _descCont.clear();
-                            selectedDate = null;
+                            selectedDate = DateTime.now();
                           });
                           Navigator.of(context).pop(); // Close the BottomSheet
                         },
@@ -433,36 +443,43 @@ class _LossesScreenState extends State<LossesScreen> {
                                 isWithdraw: true,
                               );
 
-                              double d = double.parse(_amountCont.text);
-                              double cuurentBal =
+                             double d = double.parse(_amountCont.text);
+                              double currentBal =
                                   double.parse(widget.goal.currentBalance);
-                              if (d > cuurentBal) {
+                              double goalAmount =
+                                  double.parse(widget.goal.amount);
+
+                              if (d > currentBal) {
                                 Navigator.pop(context);
-                                setModelSatate(() {
+                                setModelState(() {
                                   _amountCont.clear();
                                   _descCont.clear();
-                                  selectedDate = null;
+                                  selectedDate = DateTime.now();
                                 });
 
-                                ScaffoldMessenger.of(context)
-                                    .showSnackBar(SnackBar(
-                                  content: Text(
-                                      "You can't withdraw more than your current balance"),
-                                ));
+                                Fluttertoast.showToast(
+                                  msg: "You can't withdraw more than your current balance",
+                                  toastLength: Toast.LENGTH_SHORT,
+                                  gravity: ToastGravity.BOTTOM,
+                                  backgroundColor: Colors.black54,
+                                  textColor: Colors.white,
+                                  fontSize: 16.0,
+                                );
                               } else {
                                 _dbHelper.addSaving(widget.goal.id!, saving);
                                 double a = double.parse(widget.goal.amount);
                                 double b = double.parse(_amountCont.text);
 
                                 setState(() {
-                                  final c = a - 1 - b;
+                                  // final c = a - b;
+                                   final c = currentBal - d;
                                   widget.goal.currentBalance = c.toString();
                                 });
 
-                                setModelSatate(() {
+                                setModelState(() {
                                   _amountCont.clear();
                                   _descCont.clear();
-                                  selectedDate = null;
+                                  selectedDate = DateTime.now();
                                 });
 
                                 Navigator.pop(context);
@@ -475,38 +492,50 @@ class _LossesScreenState extends State<LossesScreen> {
                               );
 
                               double d = double.parse(_amountCont.text);
-                              double cuurentBal =
+                              double currentBal =
+                                  double.parse(widget.goal.currentBalance);
+                              double goalAmount =
                                   double.parse(widget.goal.amount);
-                              if (d > cuurentBal) {
-                                Navigator.pop(context);
 
-                                setModelSatate(() {
-                                  _amountCont.clear();
-                                  _descCont.clear();
-                                  selectedDate = null;
-                                });
-                                ScaffoldMessenger.of(context)
-                                    .showSnackBar(SnackBar(
-                                  content: Text(
-                                      "You can't save more than your current balance"),
-                                ));
-                              } else {
-                                _dbHelper.addSaving(widget.goal.id!, saving);
-                                double a =
-                                    double.parse(widget.goal.currentBalance);
-                                double b = double.parse(_amountCont.text);
-
-                                setState(() {
-                                  final c = a - 1 + b;
-                                  widget.goal.currentBalance = c.toString();
-                                });
-                                setModelSatate(() {
-                                  _amountCont.clear();
-                                  _descCont.clear();
-                                  selectedDate = null;
-                                });
+                              if (currentBal >= goalAmount) {
+                                Fluttertoast.showToast(
+                                  msg: "You have already reached your goal amount!",
+                                  toastLength: Toast.LENGTH_SHORT,
+                                  gravity: ToastGravity.BOTTOM,
+                                  backgroundColor: Colors.black54,
+                                  textColor: Colors.white,
+                                  fontSize: 16.0,
+                                );
                                 Navigator.pop(context);
+                                return;
                               }
+
+                              if (d > (goalAmount - currentBal)) {
+                                Fluttertoast.showToast(
+                                  msg: "You can't save more than your goal amount",
+                                  toastLength: Toast.LENGTH_SHORT,
+                                  gravity: ToastGravity.BOTTOM,
+                                  backgroundColor: Colors.black54,
+                                  textColor: Colors.white,
+                                  fontSize: 16.0,
+                                );
+                                Navigator.pop(context);
+                                return;
+                              }
+
+                              _dbHelper.addSaving(widget.goal.id!, saving);
+                              setState(() {
+                                final c = currentBal + d;
+                                widget.goal.currentBalance = c.toString();
+                              });
+
+                              setModelState(() {
+                                _amountCont.clear();
+                                _descCont.clear();
+                                selectedDate = DateTime.now();
+                              });
+
+                              Navigator.pop(context);
                             }
                           }
                         },
@@ -518,10 +547,254 @@ class _LossesScreenState extends State<LossesScreen> {
               ),
             ),
           );
-        });
-      },
-    );
-  }
+        },
+      );
+    },
+  );
+}
+
+//  void _showAddSavingSheet(BuildContext context, {required bool isWithdraw}) {
+//   showModalBottomSheet(
+//     context: context,
+//     isScrollControlled: true,
+//     backgroundColor: Colors.grey[900],
+//     shape: const RoundedRectangleBorder(
+//       borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+//     ),
+//     builder: (BuildContext context) {
+//       return StatefulBuilder(
+//         builder: (BuildContext context, StateSetter setModelSatate) {
+//           return Padding(
+//             padding: EdgeInsets.only(
+//               left: 16,
+//               right: 16,
+//               top: 16,
+//               bottom: MediaQuery.of(context).viewInsets.bottom + 16, // Handles keyboard padding
+//             ),
+//             child: Form(
+//               key: _formKey,
+//               child: Column(
+//                 mainAxisSize: MainAxisSize.min,
+//                 children: [
+//                   Text(
+//                     isWithdraw == true ? "Withdrawal" : "Add Saving",
+//                     style: TextStyle(
+//                         fontSize: 18,
+//                         fontWeight: FontWeight.bold,
+//                         color: Colors.white),
+//                   )
+//                       .animate()
+//                       .fadeIn(duration: 500.ms)
+//                       .slideX(begin: -0.2, end: 0),
+//                   const SizedBox(height: 16),
+//                   TextFormField(
+//                     controller: _amountCont,
+//                     style: TextStyle(color: Colors.white),
+//                     decoration: const InputDecoration(
+//                         labelText: "Amount",
+//                         hintText: "0",
+//                         labelStyle: TextStyle(color: Colors.grey),
+//                         border: OutlineInputBorder(
+//                             borderRadius: BorderRadius.all(
+//                               Radius.circular(15),
+//                             ),
+//                             borderSide: BorderSide(color: Colors.grey)),
+//                         enabledBorder: OutlineInputBorder(
+//                             borderRadius: BorderRadius.all(
+//                               Radius.circular(15),
+//                             ),
+//                             borderSide: BorderSide(color: Colors.grey)),
+//                         focusedBorder: OutlineInputBorder(
+//                             borderRadius: BorderRadius.all(
+//                               Radius.circular(15),
+//                             ),
+//                             borderSide: BorderSide(color: Colors.grey))),
+//                     keyboardType: TextInputType.number,
+//                   )
+//                       .animate()
+//                       .fadeIn(duration: 600.ms)
+//                       .slideX(begin: -0.4, end: 0),
+//                   const SizedBox(height: 16),
+//                   TextFormField(
+//                     controller: _descCont,
+//                     style: TextStyle(color: Colors.white),
+//                     decoration: const InputDecoration(
+//                         labelText: "Description",
+//                         hintText: "Additional noted",
+//                         labelStyle: TextStyle(color: Colors.grey),
+//                         border: OutlineInputBorder(
+//                             borderRadius: BorderRadius.all(
+//                               Radius.circular(15),
+//                             ),
+//                             borderSide: BorderSide(color: Colors.grey)),
+//                         enabledBorder: OutlineInputBorder(
+//                             borderRadius: BorderRadius.all(
+//                               Radius.circular(15),
+//                             ),
+//                             borderSide: BorderSide(color: Colors.grey)),
+//                         focusedBorder: OutlineInputBorder(
+//                             borderRadius: BorderRadius.all(
+//                               Radius.circular(15),
+//                             ),
+//                             borderSide: BorderSide(color: Colors.grey))),
+//                   )
+//                       .animate()
+//                       .fadeIn(duration: 700.ms)
+//                       .slideX(begin: -0.6, end: 0),
+//                   const SizedBox(height: 16),
+//                   Row(
+//                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
+//                     children: [
+//                       Text(
+//                         DateFormat('MMM dd, yyyy')
+//                             .format(selectedDate ?? DateTime.now()),
+//                         style: const TextStyle(
+//                             fontSize: 18,
+//                             fontWeight: FontWeight.w500,
+//                             color: Colors.white),
+//                       ),
+//                       InkWell(
+//                           onTap: () async {
+//                             final DateTime? picked = await showDatePicker(
+//                               context: context,
+//                               initialDate: selectedDate,
+//                               firstDate: DateTime.now(),
+//                               lastDate: DateTime(2030),
+//                             );
+//                             if (picked != null) {
+//                               setModelSatate(() => selectedDate = picked);
+//                             }
+//                           },
+//                           child:
+//                               Icon(Icons.calendar_today, color: Colors.white)),
+//                     ],
+//                   )
+//                       .animate()
+//                       .fadeIn(duration: 900.ms)
+//                       .slideX(begin: -0.8, end: 0),
+//                   const SizedBox(height: 16),
+//                   Row(
+//                     mainAxisAlignment: MainAxisAlignment.end,
+//                     children: [
+//                       TextButton(
+//                         onPressed: () {
+//                           setModelSatate(() {
+//                             _amountCont.clear();
+//                             _descCont.clear();
+//                             selectedDate = DateTime.now();
+//                           });
+//                           Navigator.of(context).pop(); // Close the BottomSheet
+//                         },
+//                         child: const Text("Cancel"),
+//                       ),
+//                       ElevatedButton(
+//                         onPressed: () async {
+//                           if (_formKey.currentState!.validate()) {
+//                             if (isWithdraw == true) {
+//                               final saving = SavingModel(
+//                                 savingAmount: _amountCont.text,
+//                                 transactionDate: selectedDate.toString(),
+//                                 isWithdraw: true,
+//                               );
+
+//                               double d = double.parse(_amountCont.text);
+//                               double cuurentBal =
+//                                   double.parse(widget.goal.currentBalance);
+//                               if (d > cuurentBal) {
+//                                 Navigator.pop(context);
+//                                 setModelSatate(() {
+//                                   _amountCont.clear();
+//                                   _descCont.clear();
+//                                   selectedDate = DateTime.now();
+//                                 });
+
+//                                 Fluttertoast.showToast(
+//                                   msg: "You can't withdraw more than your current balance",
+//                                   toastLength: Toast.LENGTH_SHORT, // or Toast.LENGTH_LONG
+//                                   gravity: ToastGravity.BOTTOM, // Position of the toast
+//                                   backgroundColor: Colors.black54,
+//                                   textColor: Colors.white,
+//                                   fontSize: 16.0,
+//                                 );
+
+//                               } else {
+//                                 _dbHelper.addSaving(widget.goal.id!, saving);
+//                                 double a = double.parse(widget.goal.amount);
+//                                 double b = double.parse(_amountCont.text);
+
+//                                 setState(() {
+//                                   final c = a - b;
+//                                   widget.goal.currentBalance = c.toString();
+//                                 });
+
+//                                 setModelSatate(() {
+//                                   _amountCont.clear();
+//                                   _descCont.clear();
+//                                   selectedDate = DateTime.now();
+//                                 });
+
+//                                 Navigator.pop(context);
+//                               }
+//                             } else {
+//                               final saving = SavingModel(
+//                                 savingAmount: _amountCont.text,
+//                                 transactionDate: selectedDate.toString(),
+//                                 isWithdraw: false,
+//                               );
+
+//                               double d = double.parse(_amountCont.text);
+//                               double cuurentBal =
+//                                   double.parse(widget.goal.amount);
+//                               if (d > cuurentBal) {
+//                                 Navigator.pop(context);
+
+//                                 setModelSatate(() {
+//                                   _amountCont.clear();
+//                                   _descCont.clear();
+//                                   selectedDate = DateTime.now();
+//                                 });
+//                                 Fluttertoast.showToast(
+//                                   msg: "You can't save more than your current balance",
+//                                   toastLength: Toast.LENGTH_SHORT, // or Toast.LENGTH_LONG
+//                                   gravity: ToastGravity.BOTTOM, // Position of the toast
+//                                   backgroundColor: Colors.black54,
+//                                   textColor: Colors.white,
+//                                   fontSize: 16.0,
+//                                 );
+
+//                               } else {
+//                                 _dbHelper.addSaving(widget.goal.id!, saving);
+//                                 double a =
+//                                     double.parse(widget.goal.currentBalance);
+//                                 double b = double.parse(_amountCont.text);
+
+//                                 setState(() {
+//                                   final c = a + b; // Corrected calculation
+//                                   widget.goal.currentBalance = c.toString();
+//                                 });
+//                                 setModelSatate(() {
+//                                   _amountCont.clear();
+//                                   _descCont.clear();
+//                                   selectedDate = DateTime.now();
+//                                 });
+//                                 Navigator.pop(context);
+//                               }
+//                             }
+//                           }
+//                         },
+//                         child: Text(isWithdraw == true ? "Withdraw" : "Add"),
+//                       ),
+//                     ],
+//                   ),
+//                 ],
+//               ),
+//             ),
+//           );
+//         });
+//     },
+//   );
+// }
+
 
   Widget _buildActionButton(
       String label, IconData icon, Color color, bool isActive,

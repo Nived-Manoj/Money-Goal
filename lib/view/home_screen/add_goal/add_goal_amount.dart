@@ -1,7 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_animate/flutter_animate.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:intl/intl.dart' as intl;
+import 'package:money_goal_application/db_functions/db_helper.dart';
+import 'package:money_goal_application/model/goal_model.dart';
+import 'package:money_goal_application/model/saving_model.dart';
+import 'package:money_goal_application/view/bottom_nav_bar/bottom_nav_bar.dart';
 import 'package:money_goal_application/view/home_screen/add_goal/add_goal_reminder.dart';
 
 class SavingsGoalDetails extends StatefulWidget {
@@ -265,19 +270,50 @@ class _SavingsGoalDetailsState extends State<SavingsGoalDetails> {
                 child: ElevatedButton(
                   onPressed: () {
                     if(_formKey.currentState!.validate()){
-                      Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => SavingsReminderSettings(
-                          amount: goalAmountController.text,
-                          balance: currentBalanceController.text,
-                          currency: selectedCurrency,
-                          name: widget.name,
-                          date: selectedDate,
-                          icon: widget.icon,
-                        ),
-                      ),
-                    );
+                      List<SavingModel> lists = [];
+                    final model = SavingModel(
+                        description: "deskkck",
+                        savingAmount: currentBalanceController.text,
+                        transactionDate: DateTime.now().toString());
+                    lists.add(model);
+                    final result = GoalModel.fromIconData(
+                        name: widget.name,
+                        currency: selectedCurrency,
+                        amount: goalAmountController.text,
+                        currentBalance: currentBalanceController.text,
+                        targetDate: selectedDate,
+                        icon: widget.icon,
+                        savings: lists);
+
+                    DatabaseHelper().addGoal(result);
+
+                    Navigator.pushAndRemoveUntil(
+                        context,
+                        MaterialPageRoute(builder: (context) => const BottomNav()),
+                        (Route<dynamic> route) => false);
+
+                        Fluttertoast.showToast(
+    msg: 'Goal added successfully',
+    toastLength: Toast.LENGTH_SHORT, // or Toast.LENGTH_LONG
+    gravity: ToastGravity.BOTTOM, // Position of the toast
+    backgroundColor: Colors.green,
+    textColor: Colors.white,
+    fontSize: 16.0,
+  );
+                  
+                    //   Navigator.push(
+                    //   context,
+                    //   MaterialPageRoute(
+                    //     builder: (context) => SavingsReminderSettings(
+                    //       amount: goalAmountController.text,
+                    //       balance: currentBalanceController.text,
+                    //       currency: selectedCurrency,
+                    //       name: widget.name,
+                    //       date: selectedDate,
+                    //       icon: widget.icon,
+                    //     ),
+                    //   ),
+                    // );
                     }
                   },
                   style: ElevatedButton.styleFrom(

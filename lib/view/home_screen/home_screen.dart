@@ -20,7 +20,7 @@ class _HomeScreenState extends State<HomeScreen>
   late AnimationController _progressController;
   late Animation<double> _progressAnimation;
   final DatabaseHelper _dbHelper = DatabaseHelper();
-  String selectedSortOption = 'Progress'; // Default sorting option
+  String selectedSortOption = 'Date'; // Default sorting option
 
   @override
   void initState() {
@@ -182,8 +182,7 @@ class _HomeScreenState extends State<HomeScreen>
                               );
                             },
                           ),
-                       
-                       
+
                           // Premium Button
                           // TweenAnimationBuilder(
                           //   duration: const Duration(milliseconds: 800),
@@ -233,9 +232,6 @@ class _HomeScreenState extends State<HomeScreen>
                           //     );
                           //   },
                           // ),
-                       
-                       
-                       
                         ],
                       ),
                     ),
@@ -281,9 +277,40 @@ class _HomeScreenState extends State<HomeScreen>
                               final items = box.values.toList();
                               final sortedItems = _sortGoals(items);
 
+                              if (sortedItems.isEmpty) {
+                                return Container(
+                                  height:
+                                      MediaQuery.of(context).size.height * 0.5,
+                                  width: double.infinity,
+                                  decoration: BoxDecoration(
+                                      // color: Colors.white,
+                                      borderRadius: BorderRadius.circular(16),
+                                      // boxShadow: [
+                                      //   BoxShadow(
+                                      //     color: Colors.black.withOpacity(0.05),
+                                      //     blurRadius: 10,
+                                      //     offset: const Offset(0, 4),
+                                      //   ),
+                                      // ]
+                                      ),
+                                  child: Column(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.center,
+                                    children: [
+                                      Text(
+                                        "No goals added yet!",
+                                        style: TextStyle(color: Colors.grey),
+                                      )
+                                    ],
+                                  ),
+                                );
+                              }
+
                               return Column(
-                                children: List.generate(items.length, (index) {
-                                  final item = items[index];
+                                children:
+                                    List.generate(sortedItems.length, (index) {
+                                  final item = sortedItems[index];
                                   final goalKey = box.keyAt(index);
                                   return _buildSavingsCard(context,
                                       goal: item, index: goalKey);
@@ -291,12 +318,8 @@ class _HomeScreenState extends State<HomeScreen>
                               );
                             })),
                   ),
-
-                  
                 ],
               ),
-
-             
 
               // Add Goal Button
               Positioned(
@@ -326,11 +349,12 @@ class _HomeScreenState extends State<HomeScreen>
                 return Container(
                   height: 350,
                   child: Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 15),
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 15, vertical: 15),
                     child: Column(
                       children: [
                         Row(
-                         children: [
+                          children: [
                             Text(
                               'Sort by',
                               style: TextStyle(
@@ -341,21 +365,23 @@ class _HomeScreenState extends State<HomeScreen>
                             Spacer(),
                             IconButton(
                               onPressed: () {
-                                 setState(() {
-                              selectedSortOption = 'Date';
-                            });
-                            Navigator.pop(context);
+                                setState(() {
+                                  selectedSortOption = 'Date';
+                                });
+                                Navigator.pop(context);
                               },
                               icon: Icon(Icons.close),
                             ),
-                         ],
+                          ],
                         ),
                         ListTile(
-                          title: const Text('Progress',
-                           style: TextStyle(
-                                fontSize: 18,
-                                fontWeight: FontWeight.normal,
-                              ),),
+                          title: const Text(
+                            'Progress',
+                            style: TextStyle(
+                              fontSize: 18,
+                              fontWeight: FontWeight.normal,
+                            ),
+                          ),
                           trailing: selectedSortOption == 'Progress'
                               ? Icon(
                                   Icons.check,
@@ -370,11 +396,13 @@ class _HomeScreenState extends State<HomeScreen>
                           },
                         ),
                         ListTile(
-                          title: Text('Date',
-                           style: TextStyle(
-                                fontSize: 18,
-                                fontWeight: FontWeight.normal,
-                              ),),
+                          title: Text(
+                            'Date',
+                            style: TextStyle(
+                              fontSize: 18,
+                              fontWeight: FontWeight.normal,
+                            ),
+                          ),
                           trailing: selectedSortOption == 'Date'
                               ? Icon(
                                   Icons.check,
@@ -389,11 +417,13 @@ class _HomeScreenState extends State<HomeScreen>
                           },
                         ),
                         ListTile(
-                          title: Text('Alphabet',
-                           style: TextStyle(
-                                fontSize: 18,
-                                fontWeight: FontWeight.normal,
-                              ),),
+                          title: Text(
+                            'Alphabet',
+                            style: TextStyle(
+                              fontSize: 18,
+                              fontWeight: FontWeight.normal,
+                            ),
+                          ),
                           trailing: selectedSortOption == 'Alphabet'
                               ? Icon(
                                   Icons.check,
@@ -470,112 +500,149 @@ class _HomeScreenState extends State<HomeScreen>
               );
             },
             child: Container(
+              margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
               decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(24),
+                gradient: LinearGradient(
+                  colors: [
+                    Colors.white,
+                    Colors.grey.shade50,
+                  ],
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                ),
+                borderRadius: BorderRadius.circular(30),
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.black.withOpacity(0.05),
-                    blurRadius: 20,
+                    color: Colors.green.shade100.withOpacity(0.5),
+                    blurRadius: 25,
                     offset: const Offset(0, 10),
+                    spreadRadius: -5,
                   ),
                 ],
               ),
-              child: Material(
-                color: Colors.transparent,
-                child: Padding(
-                  padding: const EdgeInsets.all(24.0),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Row(
-                        children: [
-                          Container(
-                            padding: const EdgeInsets.all(12),
-                            decoration: BoxDecoration(
-                              gradient: LinearGradient(
-                                colors: [
-                                  Colors.green.shade400,
-                                  Colors.green.shade600,
+              child: Stack(
+                children: [
+                  // Background Progress Indicator
+                  Positioned.fill(
+                    child: ClipRRect(
+                      borderRadius: BorderRadius.circular(30),
+                      child: LinearProgressIndicator(
+                        value: progress,
+                        backgroundColor: Colors.green.shade50,
+                        valueColor: AlwaysStoppedAnimation<Color>(
+                          Colors.green.shade300.withOpacity(0.3),
+                        ),
+                      ),
+                    ),
+                  ),
+
+                  Padding(
+                    padding: const EdgeInsets.all(24.0),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        // Header Row with Icon and Goal Name
+                        Row(
+                          children: [
+                            Container(
+                              padding: const EdgeInsets.all(12),
+                              decoration: BoxDecoration(
+                                gradient: LinearGradient(
+                                  colors: [
+                                    Colors.green.shade400,
+                                    Colors.green.shade600,
+                                  ],
+                                ),
+                                borderRadius: BorderRadius.circular(16),
+                                boxShadow: [
+                                  BoxShadow(
+                                    color:
+                                        Colors.green.shade200.withOpacity(0.5),
+                                    blurRadius: 10,
+                                    offset: const Offset(0, 4),
+                                  ),
                                 ],
                               ),
-                              borderRadius: BorderRadius.circular(16),
-                            ),
-                            child: Icon(
-                              _icon,
-                              color: Colors.white,
-                              size: 24,
-                            ),
-                          ),
-                          const SizedBox(width: 16),
-                          Text(
-                            goal.name,
-                            style: TextStyle(
-                              fontSize: 20,
-                              fontWeight: FontWeight.w600,
-                            ),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 24),
-                      RichText(
-                        text: TextSpan(
-                          children: [
-                            TextSpan(
-                              text: '₹${goal.currentBalance}',
-                              style: TextStyle(
-                                color: Colors.grey[400],
-                                fontSize: 24,
-                                fontWeight: FontWeight.normal,
+                              child: Icon(
+                                _icon,
+                                color: Colors.white,
+                                size: 28,
                               ),
                             ),
-                            TextSpan(
-                              text: ' / ₹${goal.amount}',
-                              style: TextStyle(
-                                color: Colors.green.shade600,
-                                fontSize: 24,
-                                fontWeight: FontWeight.bold,
+                            const SizedBox(width: 16),
+                            Expanded(
+                              child: Text(
+                                goal.name,
+                                style: TextStyle(
+                                  fontSize: 22,
+                                  fontWeight: FontWeight.w700,
+                                  color: Colors.green.shade900,
+                                ),
+                                overflow: TextOverflow.ellipsis,
                               ),
                             ),
                           ],
                         ),
-                      ),
-                      const SizedBox(height: 24),
-                      AnimatedBuilder(
-                        animation: _progressAnimation,
-                        builder: (context, child) {
-                          return Column(
+
+                        const SizedBox(height: 24),
+
+                        // Balance Information
+                        RichText(
+                          text: TextSpan(
                             children: [
-                              ClipRRect(
-                                borderRadius: BorderRadius.circular(8),
-                                child: LinearProgressIndicator(
-                                  value: progress, //_progressAnimation.value,
-                                  backgroundColor: Colors.grey[100],
-                                  valueColor: AlwaysStoppedAnimation<Color>(
-                                    Colors.green.shade400,
-                                  ),
-                                  minHeight: 8,
+                              TextSpan(
+                                text: '₹${goal.currentBalance}',
+                                style: TextStyle(
+                                  color: Colors.grey[600],
+                                  fontSize: 26,
+                                  fontWeight: FontWeight.w500,
                                 ),
                               ),
-                              const SizedBox(height: 8),
-                              Align(
-                                alignment: Alignment.centerRight,
-                                child: Text(
-                                  '${(progress * 100).toStringAsFixed(0)}%',
-                                  // '${(_progressAnimation.value * 100).toStringAsFixed(0)}%',
-                                  style: TextStyle(
-                                    color: Colors.green.shade600,
-                                    fontWeight: FontWeight.w600,
-                                  ),
+                              TextSpan(
+                                text: ' / ₹${goal.amount}',
+                                style: TextStyle(
+                                  color: Colors.green.shade700,
+                                  fontSize: 26,
+                                  fontWeight: FontWeight.bold,
                                 ),
                               ),
                             ],
-                          );
-                        },
-                      ),
-                    ],
+                          ),
+                        ),
+
+                        const SizedBox(height: 16),
+
+                        // Progress Bar
+                        ClipRRect(
+                          borderRadius: BorderRadius.circular(10),
+                          child: LinearProgressIndicator(
+                            value: progress,
+                            backgroundColor: Colors.grey[200],
+                            valueColor: AlwaysStoppedAnimation<Color>(
+                              Colors.green.shade500,
+                            ),
+                            minHeight: 10,
+                          ),
+                        ),
+
+                        const SizedBox(height: 8),
+
+                        // Progress Percentage
+                        Align(
+                          alignment: Alignment.centerRight,
+                          child: Text(
+                            '${(progress * 100).toStringAsFixed(0)}% Complete',
+                            style: TextStyle(
+                              color: Colors.green.shade700,
+                              fontWeight: FontWeight.w600,
+                              fontSize: 16,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
-                ),
+                ],
               ),
             ),
           ),
