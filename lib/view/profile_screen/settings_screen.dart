@@ -94,7 +94,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
                           icon: Icons.share_outlined,
                           title: 'Share',
                           onTap: () {
-                            shareText("hgjhgjhggjgjg");
+                            String text =
+                                "📲 Check out this amazing app developed by Auxzon Solutions! 🚀 Stay organized, manage leads, and boost productivity—all in one place. Download now and experience seamless performance! 🔥 https://play.google.com/store/apps?hl=en_IN&pli=1";
+                            shareText(text);
                           },
                         ),
                         SettingItem(
@@ -108,7 +110,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
                           icon: Icons.contact_support_outlined,
                           title: 'Contact Us',
                           onTap: () {
-                            _contactBottomsheet();
+                            _contactAlertDialogue();
+                            // _contactBottomsheet();
                           },
                         ),
                         SettingItem(
@@ -312,17 +315,18 @@ class _SettingsScreenState extends State<SettingsScreen> {
     }
   }
 
-  void _contactBottomsheet() {
+  void _contactAlertDialogue() {
     final TextEditingController messageCont = TextEditingController();
-    final TextEditingController emailCont = TextEditingController();
+    // final TextEditingController emailCont = TextEditingController();
     final formKey = GlobalKey<FormState>();
-    showModalBottomSheet(
+    showDialog(
         context: context,
         builder: (BuildContext context) {
-          return SizedBox(
-            child: Padding(
-              padding: const EdgeInsets.all(18.0),
-              child: SingleChildScrollView(
+          return AlertDialog(
+            content: SizedBox(
+              height: 305,
+              child: Padding(
+                padding: const EdgeInsets.all(0.0),
                 child: Column(
                   children: [
                     const Text(
@@ -330,9 +334,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                       style:
                           TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
                     )
-                        .animate()
-                        .fadeIn(duration: 900.ms)
-                        .slideX(begin: -0.8, end: 0),
+                       ,
                     const SizedBox(
                       height: 15,
                     ),
@@ -412,9 +414,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                                   borderSide: BorderSide(color: Colors.red)),
                             ),
                           )
-                              .animate()
-                              .fadeIn(duration: 900.ms)
-                              .slideX(begin: -0.8, end: 0),
+                             ,
                         ],
                       ),
                     ),
@@ -439,12 +439,154 @@ class _SettingsScreenState extends State<SettingsScreen> {
                               "Sent",
                               style: TextStyle(color: Colors.white),
                             ))
-                        .animate()
-                        .fadeIn(duration: 900.ms)
-                        .slideY(begin: 0.8, end: 0),
+                       ,
                   ],
                 ),
               ),
+            ),
+          );
+        });
+  }
+
+  void _contactBottomsheet() {
+    final TextEditingController messageCont = TextEditingController();
+    // final TextEditingController emailCont = TextEditingController();
+    final formKey = GlobalKey<FormState>();
+    showModalBottomSheet(
+        context: context,
+        builder: (BuildContext context) {
+          return SingleChildScrollView(
+            child: Column(
+              children: [
+                SizedBox(
+                  child: Padding(
+                    padding: const EdgeInsets.all(18.0),
+                    child: Column(
+                      children: [
+                        const Text(
+                          "Contact us",
+                          style: TextStyle(
+                              fontSize: 20, fontWeight: FontWeight.bold),
+                        )
+                            .animate()
+                            .fadeIn(duration: 900.ms)
+                            .slideX(begin: -0.8, end: 0),
+                        const SizedBox(
+                          height: 15,
+                        ),
+                        Form(
+                          key: formKey,
+                          child: Column(
+                            children: [
+                              // TextFormField(
+                              //   controller: emailCont,
+                              //   validator: (value) {
+                              //     final emailRegex = RegExp(
+                              //       r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$',
+                              //     );
+
+                              //     if (value == null || value.trim().isEmpty) {
+                              //       return "This field is required";
+                              //     } else if (!emailRegex.hasMatch(value)) {
+                              //       return "Please enter a valid email address";
+                              //     }
+                              //     return null;
+                              //   },
+                              //   keyboardType: TextInputType.emailAddress,
+                              //   decoration: InputDecoration(
+                              //     hintText: "Enter your email",
+                              //     hintStyle: TextStyle(color: Colors.grey),
+                              //     labelText: "Email address",
+                              //     focusedBorder: OutlineInputBorder(
+                              //         borderRadius: BorderRadius.circular(15),
+                              //         borderSide: BorderSide(
+                              //             color: Colors.grey.withValues(alpha: 0.6))),
+                              //     enabledBorder: OutlineInputBorder(
+                              //         borderRadius: BorderRadius.circular(15),
+                              //         borderSide: BorderSide(
+                              //             color: Colors.grey.withValues(alpha: 0.6))),
+                              //     errorBorder: OutlineInputBorder(
+                              //         borderRadius: BorderRadius.circular(15),
+                              //         borderSide: BorderSide(color: Colors.red)),
+                              //     focusedErrorBorder: OutlineInputBorder(
+                              //         borderRadius: BorderRadius.circular(15),
+                              //         borderSide: BorderSide(color: Colors.red)),
+                              //   ),
+                              // )
+                              //     .animate()
+                              //     .fadeIn(duration: 900.ms)
+                              //     .slideX(begin: -0.8, end: 0),
+                              // const SizedBox(
+                              //   height: 10,
+                              // ),
+                              TextFormField(
+                                controller: messageCont,
+                                validator: (_) {
+                                  if (messageCont.text.trim().isEmpty ||
+                                      messageCont.text == "") {
+                                    return "This field is required";
+                                  }
+                                  return null;
+                                },
+                                maxLines: 5,
+                                decoration: InputDecoration(
+                                  hintText: "Enter your message",
+                                  hintStyle: TextStyle(color: Colors.grey),
+                                  focusedBorder: OutlineInputBorder(
+                                      borderRadius: BorderRadius.circular(15),
+                                      borderSide: BorderSide(
+                                          color: Colors.grey
+                                              .withValues(alpha: 0.6))),
+                                  enabledBorder: OutlineInputBorder(
+                                      borderRadius: BorderRadius.circular(15),
+                                      borderSide: BorderSide(
+                                          color: Colors.grey
+                                              .withValues(alpha: 0.6))),
+                                  errorBorder: OutlineInputBorder(
+                                      borderRadius: BorderRadius.circular(15),
+                                      borderSide:
+                                          BorderSide(color: Colors.red)),
+                                  focusedErrorBorder: OutlineInputBorder(
+                                      borderRadius: BorderRadius.circular(15),
+                                      borderSide:
+                                          BorderSide(color: Colors.red)),
+                                ),
+                              )
+                                  .animate()
+                                  .fadeIn(duration: 900.ms)
+                                  .slideX(begin: -0.8, end: 0),
+                            ],
+                          ),
+                        ),
+                        const SizedBox(
+                          height: 15,
+                        ),
+                        ElevatedButton(
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: Colors.black,
+                                  minimumSize: const Size(double.infinity, 56),
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(16),
+                                  ),
+                                  elevation: 0,
+                                ),
+                                onPressed: () {
+                                  if (formKey.currentState!.validate()) {
+                                    sendEmail(message: messageCont.text);
+                                  }
+                                },
+                                child: Text(
+                                  "Sent",
+                                  style: TextStyle(color: Colors.white),
+                                ))
+                            .animate()
+                            .fadeIn(duration: 900.ms)
+                            .slideY(begin: 0.8, end: 0),
+                      ],
+                    ),
+                  ),
+                ),
+              ],
             ),
           );
         });
